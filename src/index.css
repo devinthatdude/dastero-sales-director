@@ -1,0 +1,21 @@
+/* © 2026 Dastero Tech LLC — All rights reserved. See LICENSE. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --bg:#0A0E1A; --panel:#121A2C; --card:#172033; --cardh:#1D2840; --line:#26314B;
+  --brand:#3B6FF0; --brand2:#2E5BD6; --cyan:#2FB6C8; --amber:#F0A93C;
+  --rose:#F0584E; --green:#35C28A; --text:#E9EEF8; --soft:#9AA6C0; --dim:#626E8B;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2{font-family:'Space Grotesk',sans-serif}
+.panel{background:var(--panel);border:1px solid var(--line)}
+.surface{background:var(--card);border:1px solid var(--line)}
+.soft{color:var(--soft)} .dim{color:var(--dim)}
+.brandbtn{background:linear-gradient(180deg,var(--brand),var(--brand2));color:#fff;border:none}
+.input{width:100%;font-family:'Inter',sans-serif;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--text)}
+.input:focus{outline:2px solid var(--cyan);border-color:var(--cyan)}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}

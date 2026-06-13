@@ -1,0 +1,16 @@
+# secrets / environment — NEVER commit these
+.env
+.env.*
+!.env.example
+
+# dependencies / build output
+node_modules/
+dist/
+build/
+.vercel/
+
+# OS / editor noise
+.DS_Store
+*.log
+.idea/
+.vscode/

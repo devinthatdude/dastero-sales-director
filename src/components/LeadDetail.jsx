@@ -1,0 +1,158 @@
+// © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
+import { useEffect, useState } from 'react';
+import { STAGES, SERVICES, SOURCES, urgency, TONE, money } from '../lib/pipeline';
+
+const empty={company:'',contact_name:'',contact_title:'',industry:'',source:'Cold Outreach',
+  stage:'prospect',value:0,phone:'',email:'',address:'',services:[],next_action:'',action_date:'',notes:''};
+
+export default function LeadDetail({ leadId, leads, tags, isAdmin, addLead, updateLead, deleteLead, setLeadTags, onClose }){
+  const existing = leadId ? leads.find(l=>l.id===leadId) : null;
+  const [sub,setSub]=useState(leadId?'info':'edit');
+  const [form,setForm]=useState(empty);
+  useEffect(()=>{ setForm(existing?{...empty,...existing,action_date:existing.action_date||''}:empty); },[leadId]); // eslint-disable-line
+
+  const set=(k)=>(e)=>setForm(f=>({...f,[k]:e.target.value}));
+  const toggleService=(s)=>setForm(f=>({...f,services:f.services.includes(s)?f.services.filter(x=>x!==s):[...f.services,s]}));
+
+  const save=async()=>{
+    if(!form.company.trim()) return;
+    const {id,owner_id,created_at,updated_at,lead_tags,tagIds,...d}=form;
+    d.value=Number(d.value)||0; d.action_date=d.action_date||null;
+    if(existing){ updateLead(existing.id,d); setSub('info'); }
+    else { const newId=await addLead(d); if(newId) onClose(); }
+  };
+  const setStage=(stage)=>{ if(existing) updateLead(existing.id,{stage}); setForm(f=>({...f,stage})); };
+  const toggleTag=(tagId)=>{
+    if(!existing) return;
+    const cur=existing.tagIds||[];
+    setLeadTags(existing.id, cur.includes(tagId)?cur.filter(t=>t!==tagId):[...cur,tagId]);
+  };
+
+  const SUBS = existing ? ['info','edit','tags','cadence','notes'] : ['edit'];
+  const u = existing ? urgency(existing) : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      style={{background:'rgba(4,7,15,.66)'}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="panel w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-auto">
+        <div className="flex items-start justify-between p-5 pb-3">
+          <div>
+            <h2 className="text-xl font-bold text-white leading-tight">{form.company||'New lead'}</h2>
+            {existing && <div className="soft text-sm">{existing.contact_name||'—'}{existing.contact_title?` · ${existing.contact_title}`:''}</div>}
+          </div>
+          <button onClick={onClose} className="dim text-xl px-2">✕</button>
+        </div>
+
+        <div className="flex gap-4 px-5 border-b text-sm font-semibold" style={{borderColor:'#26314B'}}>
+          {SUBS.map(s=>(
+            <button key={s} onClick={()=>setSub(s)} className="pb-2 capitalize"
+              style={{color:sub===s?'#2FB6C8':'#626E8B',borderBottom:sub===s?'2px solid #2FB6C8':'2px solid transparent'}}>{s}</button>
+          ))}
+        </div>
+
+        <div className="p-5">
+          {sub==='info'   && existing && <Info lead={existing} tags={tags} u={u} setStage={setStage} isAdmin={isAdmin} onDelete={()=>{deleteLead(existing.id);onClose();}} />}
+          {sub==='edit'   && <Edit form={form} set={set} toggleService={toggleService} save={save} isNew={!existing} />}
+          {sub==='tags'   && existing && <Tags tags={tags} active={existing.tagIds||[]} toggle={toggleTag} />}
+          {sub==='cadence'&& existing && (
+            <div className="soft text-sm">Next: <span className="text-white">{existing.next_action||'—'}</span>{existing.action_date?` · ${existing.action_date}`:''}
+              <div className="dim mt-3">Full follow-up sequences arrive in a later update.</div></div>
+          )}
+          {sub==='notes'  && existing && <Notes lead={existing} updateLead={updateLead} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Row({k,v}){ return <div><div className="dim text-[11px] uppercase tracking-wide font-semibold">{k}</div><div className="text-white text-sm mt-0.5">{v||'—'}</div></div>; }
+
+function Info({lead,tags,u,setStage,isAdmin,onDelete}){
+  const leadTags=(lead.tagIds||[]).map(id=>tags.find(t=>t.id===id)).filter(Boolean);
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {STAGES.map(s=>(
+          <button key={s.id} onClick={()=>setStage(s.id)} className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+            style={{border:`1px solid ${lead.stage===s.id?s.color:'#26314B'}`,color:lead.stage===s.id?'#fff':'#9AA6C0',
+              background:lead.stage===s.id?s.color+'22':'transparent'}}>{s.name}</button>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <Row k="Value" v={money(lead.value)}/><Row k="Industry" v={lead.industry}/>
+        <Row k="Source" v={lead.source}/><Row k="Phone" v={lead.phone}/>
+        <Row k="Email" v={lead.email}/><Row k="Address" v={lead.address}/>
+        <Row k="Next action" v={lead.next_action}/><Row k="Action date" v={lead.action_date}/>
+      </div>
+      {(lead.services||[]).length>0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {lead.services.map(s=> <span key={s} className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{background:'rgba(53,194,138,.14)',color:'#35C28A'}}>{s}</span>)}
+        </div>
+      )}
+      {leadTags.length>0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {leadTags.map(t=> <span key={t.id} className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{background:t.color+'22',color:t.color}}>{t.emoji} {t.label}</span>)}
+        </div>
+      )}
+      {u && (u.tone==='cold'||u.tone==='warm') && (
+        <div className="text-sm font-semibold rounded-lg px-3 py-2" style={{background:TONE[u.tone]+'1A',color:TONE[u.tone]}}>{u.label} — {lead.next_action||'follow up'}</div>
+      )}
+      <div className="grid grid-cols-2 gap-2.5">
+        {lead.phone && <a href={`tel:${lead.phone}`} className="surface rounded-xl py-3 text-center text-sm font-semibold text-white">📞 Call</a>}
+        {lead.email && <a href={`mailto:${lead.email}`} className="surface rounded-xl py-3 text-center text-sm font-semibold text-white">✉️ Email</a>}
+      </div>
+      {isAdmin && <button onClick={onDelete} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#F0584E',background:'rgba(240,88,78,.1)'}}>Delete lead</button>}
+    </div>
+  );
+}
+
+function Field({l,children}){ return <label className="block flex-1"><span className="dim text-[11px] uppercase tracking-wide font-semibold block mb-1">{l}</span>{children}</label>; }
+
+function Edit({form,set,toggleService,save,isNew}){
+  return (
+    <div className="space-y-3">
+      <Field l="Company"><input className="input" value={form.company} onChange={set('company')} /></Field>
+      <div className="flex gap-3"><Field l="Contact"><input className="input" value={form.contact_name} onChange={set('contact_name')} /></Field><Field l="Title"><input className="input" value={form.contact_title} onChange={set('contact_title')} /></Field></div>
+      <div className="flex gap-3"><Field l="Value ($)"><input type="number" className="input" value={form.value} onChange={set('value')} /></Field><Field l="Industry"><input className="input" value={form.industry} onChange={set('industry')} /></Field></div>
+      <div className="flex gap-3">
+        <Field l="Stage"><select className="input" value={form.stage} onChange={set('stage')}>{STAGES.map(s=> <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
+        <Field l="Source"><select className="input" value={form.source} onChange={set('source')}>{SOURCES.map(s=> <option key={s}>{s}</option>)}</select></Field>
+      </div>
+      <div className="flex gap-3"><Field l="Phone"><input className="input" value={form.phone} onChange={set('phone')} /></Field><Field l="Email"><input className="input" value={form.email} onChange={set('email')} /></Field></div>
+      <Field l="Address"><input className="input" value={form.address} onChange={set('address')} /></Field>
+      <div className="flex gap-3"><Field l="Next action"><input className="input" value={form.next_action} onChange={set('next_action')} /></Field><Field l="Action date"><input type="date" className="input" value={form.action_date} onChange={set('action_date')} /></Field></div>
+      <Field l="Services">
+        <div className="flex flex-wrap gap-1.5">
+          {SERVICES.map(s=>(
+            <button key={s} onClick={()=>toggleService(s)} className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+              style={{border:`1px solid ${form.services.includes(s)?'#35C28A':'#26314B'}`,color:form.services.includes(s)?'#35C28A':'#9AA6C0',
+                background:form.services.includes(s)?'rgba(53,194,138,.12)':'transparent'}}>{s}</button>
+          ))}
+        </div>
+      </Field>
+      <button onClick={save} className="brandbtn w-full rounded-xl py-3 font-semibold text-sm mt-1">{isNew?'Create lead':'Save changes'}</button>
+    </div>
+  );
+}
+
+function Tags({tags,active,toggle}){
+  if(tags.length===0) return <div className="dim text-sm">No tags in the catalog yet.</div>;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {tags.map(t=>{ const on=active.includes(t.id);
+        return <button key={t.id} onClick={()=>toggle(t.id)} className="text-xs font-semibold px-3 py-1.5 rounded-full"
+          style={{border:`1px solid ${on?t.color:'#26314B'}`,color:on?'#fff':'#9AA6C0',background:on?t.color+'22':'transparent'}}>{t.emoji} {t.label}</button>;
+      })}
+    </div>
+  );
+}
+
+function Notes({lead,updateLead}){
+  const [v,setV]=useState(lead.notes||'');
+  return (
+    <div>
+      <textarea className="input" rows={6} value={v} onChange={e=>setV(e.target.value)} placeholder="Call notes, context, next steps…" />
+      <button onClick={()=>updateLead(lead.id,{notes:v})} className="brandbtn rounded-xl py-2.5 px-4 font-semibold text-sm mt-2">Save notes</button>
+    </div>
+  );
+}
