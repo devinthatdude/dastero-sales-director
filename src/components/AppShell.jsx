@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useLeads } from '../hooks/useLeads';
 import { useTags } from '../hooks/useTags';
+import { useProfiles } from '../hooks/useProfiles';
 import TodayTab from './tabs/TodayTab';
 import PipelineTab from './tabs/PipelineTab';
 import CoachTab from './tabs/CoachTab';
@@ -22,10 +23,11 @@ const TABS=[
 export default function AppShell({ profile, isAdmin, onSignOut }){
   const data=useLeads();
   const tags=useTags();
+  const profiles=useProfiles(isAdmin);
   const [tab,setTab]=useState('today');
-  const [detail,setDetail]=useState(null); // lead id, 'new', or null
+  const [detail,setDetail]=useState(null);
 
-  const shared={ ...data, tags, isAdmin, profile, onSignOut, onOpen:(id)=>setDetail(id) };
+  const shared={ ...data, tags, isAdmin, profile, profiles, onSignOut, onOpen:(id)=>setDetail(id) };
 
   return (
     <div className="min-h-screen pb-20 max-w-2xl mx-auto">
@@ -50,13 +52,13 @@ export default function AppShell({ profile, isAdmin, onSignOut }){
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} className="flex flex-col items-center gap-0.5 px-2">
             <span className="text-lg" style={{filter: tab===t.id?'none':'grayscale(1)',opacity: tab===t.id?1:.55}}>{t.icon}</span>
-            <span className="text-[10px] font-semibold tracking-wide" style={{color: tab===t.id?'#2FB6C8':'#626E8B'}}>{t.label.toUpperCase()}</span>
+            <span className="text-[10px] font-semibold tracking-wide" style={{color: tab===t.id?'#2FB6C8':'#626E8B'}}>{t.id.toUpperCase()}</span>
           </button>
         ))}
       </nav>
 
       {detail!==null && (
-        <LeadDetail leadId={detail==='new'?null:detail} {...data} tags={tags} isAdmin={isAdmin} onClose={()=>setDetail(null)} />
+        <LeadDetail leadId={detail==='new'?null:detail} {...data} tags={tags} profiles={profiles} isAdmin={isAdmin} onClose={()=>setDetail(null)} />
       )}
     </div>
   );

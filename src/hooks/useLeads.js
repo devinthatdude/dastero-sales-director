@@ -6,6 +6,11 @@ export function useLeads(){
   const [leads,setLeads]=useState([]);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState(null);
+  const [userId,setUserId]=useState(null);
+
+  useEffect(()=>{
+    supabase.auth.getUser().then(({data})=>setUserId(data.user?.id??null));
+  },[]);
 
   const fetchAll=useCallback(async ()=>{
     const {data:rows,error:e}=await supabase
@@ -26,10 +31,11 @@ export function useLeads(){
   },[fetchAll]);
 
   const run=async(op)=>{ const {error:e}=await op; if(e) setError(e.message); else fetchAll(); };
+
   const addLead=async(fields)=>{
-    const {data,error:e}=await supabase.from('leads').insert(fields).select('id').single();
+    const {data,error:e}=await supabase.from('leads').insert({...fields,user_id:userId}).select('id').single();
     if(e){ setError(e.message); return null; }
-    fetchAll(); return data?.id ?? null;
+    fetchAll(); return data?.id??null;
   };
   const updateLead=(id,patch)=>run(supabase.from('leads').update(patch).eq('id',id));
   const deleteLead=(id)=>run(supabase.from('leads').delete().eq('id',id));
@@ -42,5 +48,5 @@ export function useLeads(){
     fetchAll();
   };
 
-  return { leads, loading, error, addLead, updateLead, deleteLead, setLeadTags, clearError:()=>setError(null) };
+  return { leads, loading, error, userId, addLead, updateLead, deleteLead, setLeadTags, clearError:()=>setError(null) };
 }

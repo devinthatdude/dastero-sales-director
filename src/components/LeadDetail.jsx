@@ -2,10 +2,49 @@
 import { useEffect, useState } from 'react';
 import { STAGES, SERVICES, SOURCES, urgency, TONE, money } from '../lib/pipeline';
 
+function printDealSheet(lead, tags){
+  const leadTags=(lead.tagIds||[]).map(id=>tags.find(t=>t.id===id)).filter(Boolean);
+  const w=window.open('','_blank','width=800,height=900');
+  w.document.write(`<!doctype html><html><head><title>${lead.company} — Deal Sheet</title>
+  <style>
+    body{font-family:system-ui,sans-serif;margin:40px;color:#111;max-width:680px}
+    h1{font-size:24px;margin:0 0 4px} .sub{color:#555;font-size:14px;margin-bottom:24px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:24px}
+    .field label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#888;display:block;margin-bottom:2px}
+    .field span{font-size:14px;font-weight:600}
+    .tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+    .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid #ddd}
+    .services{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+    .svc{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#e6f9f1;color:#1a7a4a}
+    .notes{font-size:13px;color:#333;white-space:pre-wrap;border:1px solid #eee;border-radius:8px;padding:12px;margin-top:8px}
+    .footer{margin-top:32px;font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:12px}
+  </style></head><body>
+  <h1>${lead.company}</h1>
+  <div class="sub">${[lead.contact_name,lead.contact_title].filter(Boolean).join(' · ')}</div>
+  <div class="grid">
+    <div class="field"><label>Stage</label><span>${STAGES.find(s=>s.id===lead.stage)?.name||lead.stage}</span></div>
+    <div class="field"><label>Value</label><span>${money(lead.value)}</span></div>
+    <div class="field"><label>Industry</label><span>${lead.industry||'—'}</span></div>
+    <div class="field"><label>Source</label><span>${lead.source||'—'}</span></div>
+    <div class="field"><label>Phone</label><span>${lead.phone||'—'}</span></div>
+    <div class="field"><label>Email</label><span>${lead.email||'—'}</span></div>
+    <div class="field"><label>Address</label><span>${lead.address||'—'}</span></div>
+    <div class="field"><label>Next Action</label><span>${lead.next_action||'—'}</span></div>
+    <div class="field"><label>Action Date</label><span>${lead.action_date||'—'}</span></div>
+  </div>
+  ${(lead.services||[]).length?`<div class="services">${lead.services.map(s=>`<span class="svc">${s}</span>`).join('')}</div>`:''}
+  ${leadTags.length?`<div class="tags">${leadTags.map(t=>`<span class="tag" style="border-color:${t.color};color:${t.color}">${t.emoji||''} ${t.label}</span>`).join('')}</div>`:''}
+  ${lead.notes?`<div><label style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#888">Notes</label><div class="notes">${lead.notes}</div></div>`:''}
+  <div class="footer">Dastero Tech LLC · Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+  </body></html>`);
+  w.document.close();
+  w.print();
+}
+
 const empty={company:'',contact_name:'',contact_title:'',industry:'',source:'Cold Outreach',
   stage:'prospect',value:0,phone:'',email:'',address:'',services:[],next_action:'',action_date:'',notes:''};
 
-export default function LeadDetail({ leadId, leads, tags, isAdmin, addLead, updateLead, deleteLead, setLeadTags, onClose }){
+export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, addLead, updateLead, deleteLead, setLeadTags, onClose }){
   const existing = leadId ? leads.find(l=>l.id===leadId) : null;
   const [sub,setSub]=useState(leadId?'info':'edit');
   const [form,setForm]=useState(empty);
@@ -51,7 +90,7 @@ export default function LeadDetail({ leadId, leads, tags, isAdmin, addLead, upda
         </div>
 
         <div className="p-5">
-          {sub==='info'   && existing && <Info lead={existing} tags={tags} u={u} setStage={setStage} isAdmin={isAdmin} onDelete={()=>{deleteLead(existing.id);onClose();}} />}
+          {sub==='info'   && existing && <Info lead={existing} tags={tags} profiles={profiles} u={u} setStage={setStage} isAdmin={isAdmin} onDelete={()=>{deleteLead(existing.id);onClose();}} onPrint={()=>printDealSheet(existing,tags)} />}
           {sub==='edit'   && <Edit form={form} set={set} toggleService={toggleService} save={save} isNew={!existing} />}
           {sub==='tags'   && existing && <Tags tags={tags} active={existing.tagIds||[]} toggle={toggleTag} />}
           {sub==='cadence'&& existing && (
@@ -67,8 +106,9 @@ export default function LeadDetail({ leadId, leads, tags, isAdmin, addLead, upda
 
 function Row({k,v}){ return <div><div className="dim text-[11px] uppercase tracking-wide font-semibold">{k}</div><div className="text-white text-sm mt-0.5">{v||'—'}</div></div>; }
 
-function Info({lead,tags,u,setStage,isAdmin,onDelete}){
+function Info({lead,tags,profiles,u,setStage,isAdmin,onDelete,onPrint}){
   const leadTags=(lead.tagIds||[]).map(id=>tags.find(t=>t.id===id)).filter(Boolean);
+  const owner=profiles.find(p=>p.id===lead.user_id);
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
@@ -101,6 +141,8 @@ function Info({lead,tags,u,setStage,isAdmin,onDelete}){
         {lead.phone && <a href={`tel:${lead.phone}`} className="surface rounded-xl py-3 text-center text-sm font-semibold text-white">📞 Call</a>}
         {lead.email && <a href={`mailto:${lead.email}`} className="surface rounded-xl py-3 text-center text-sm font-semibold text-white">✉️ Email</a>}
       </div>
+      {owner && <div className="text-xs dim">Owner: <span className="text-white font-semibold">{owner.full_name||owner.email}</span></div>}
+      <button onClick={onPrint} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#2FB6C8',background:'rgba(47,182,200,.08)',border:'1px solid rgba(47,182,200,.2)'}}>🖨 Print deal sheet</button>
       {isAdmin && <button onClick={onDelete} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#F0584E',background:'rgba(240,88,78,.1)'}}>Delete lead</button>}
     </div>
   );
