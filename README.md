@@ -30,6 +30,11 @@ After your first sign-in, run this once in the Supabase SQL editor:
 update public.profiles set role = 'admin' where email = 'you@dasterotech.com';
 ```
 
+## Database hardening
+One-time SQL migrations live in `sql/`. Run each once in the Supabase SQL editor:
+- `sql/2026-06-21_tags_color_hex_check.sql` — constrains `tags.color` to valid hex.
+- `sql/2026-06-21_leads_rls_edit_own.sql` — leads RLS: read-all, edit-own, admin-delete.
+
 ## Deploy (Vercel)
 Push to GitHub → import in Vercel → add the two env vars → deploy →
 add your Vercel domain to Supabase Auth → URL Configuration.

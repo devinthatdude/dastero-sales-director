@@ -2,10 +2,17 @@
 import { useEffect, useState } from 'react';
 import { STAGES, SERVICES, SOURCES, urgency, TONE, money } from '../lib/pipeline';
 
+// Escape every user-controlled value before it enters the deal-sheet HTML.
+// Leads are shared firm-wide and some fields come from imported spreadsheets,
+// so an unescaped value (e.g. "<img onerror=…>") would be stored XSS at print time.
+const esc = s => (s ?? '').toString()
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
 function printDealSheet(lead, tags){
   const leadTags=(lead.tagIds||[]).map(id=>tags.find(t=>t.id===id)).filter(Boolean);
   const w=window.open('','_blank','width=800,height=900');
-  w.document.write(`<!doctype html><html><head><title>${lead.company} — Deal Sheet</title>
+  if(!w){ alert('Pop-ups are blocked. Please allow pop-ups for this site to print deal sheets.'); return; }
+  w.document.write(`<!doctype html><html><head><title>${esc(lead.company)} — Deal Sheet</title>
   <style>
     body{font-family:system-ui,sans-serif;margin:40px;color:#111;max-width:680px}
     h1{font-size:24px;margin:0 0 4px} .sub{color:#555;font-size:14px;margin-bottom:24px}
@@ -19,22 +26,22 @@ function printDealSheet(lead, tags){
     .notes{font-size:13px;color:#333;white-space:pre-wrap;border:1px solid #eee;border-radius:8px;padding:12px;margin-top:8px}
     .footer{margin-top:32px;font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:12px}
   </style></head><body>
-  <h1>${lead.company}</h1>
-  <div class="sub">${[lead.contact_name,lead.contact_title].filter(Boolean).join(' · ')}</div>
+  <h1>${esc(lead.company)}</h1>
+  <div class="sub">${esc([lead.contact_name,lead.contact_title].filter(Boolean).join(' · '))}</div>
   <div class="grid">
-    <div class="field"><label>Stage</label><span>${STAGES.find(s=>s.id===lead.stage)?.name||lead.stage}</span></div>
+    <div class="field"><label>Stage</label><span>${esc(STAGES.find(s=>s.id===lead.stage)?.name||lead.stage)}</span></div>
     <div class="field"><label>Value</label><span>${money(lead.value)}</span></div>
-    <div class="field"><label>Industry</label><span>${lead.industry||'—'}</span></div>
-    <div class="field"><label>Source</label><span>${lead.source||'—'}</span></div>
-    <div class="field"><label>Phone</label><span>${lead.phone||'—'}</span></div>
-    <div class="field"><label>Email</label><span>${lead.email||'—'}</span></div>
-    <div class="field"><label>Address</label><span>${lead.address||'—'}</span></div>
-    <div class="field"><label>Next Action</label><span>${lead.next_action||'—'}</span></div>
-    <div class="field"><label>Action Date</label><span>${lead.action_date||'—'}</span></div>
+    <div class="field"><label>Industry</label><span>${esc(lead.industry)||'—'}</span></div>
+    <div class="field"><label>Source</label><span>${esc(lead.source)||'—'}</span></div>
+    <div class="field"><label>Phone</label><span>${esc(lead.phone)||'—'}</span></div>
+    <div class="field"><label>Email</label><span>${esc(lead.email)||'—'}</span></div>
+    <div class="field"><label>Address</label><span>${esc(lead.address)||'—'}</span></div>
+    <div class="field"><label>Next Action</label><span>${esc(lead.next_action)||'—'}</span></div>
+    <div class="field"><label>Action Date</label><span>${esc(lead.action_date)||'—'}</span></div>
   </div>
-  ${(lead.services||[]).length?`<div class="services">${lead.services.map(s=>`<span class="svc">${s}</span>`).join('')}</div>`:''}
-  ${leadTags.length?`<div class="tags">${leadTags.map(t=>`<span class="tag" style="border-color:${t.color};color:${t.color}">${t.emoji||''} ${t.label}</span>`).join('')}</div>`:''}
-  ${lead.notes?`<div><label style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#888">Notes</label><div class="notes">${lead.notes}</div></div>`:''}
+  ${(lead.services||[]).length?`<div class="services">${lead.services.map(s=>`<span class="svc">${esc(s)}</span>`).join('')}</div>`:''}
+  ${leadTags.length?`<div class="tags">${leadTags.map(t=>`<span class="tag" style="border-color:${esc(t.color)};color:${esc(t.color)}">${esc(t.emoji||'')} ${esc(t.label)}</span>`).join('')}</div>`:''}
+  ${lead.notes?`<div><label style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#888">Notes</label><div class="notes">${esc(lead.notes)}</div></div>`:''}
   <div class="footer">Dastero Tech LLC · Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
   </body></html>`);
   w.document.close();
@@ -55,7 +62,7 @@ export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, 
 
   const save=async()=>{
     if(!form.company.trim()) return;
-    const {id,owner_id,created_at,updated_at,lead_tags,tagIds,...d}=form;
+    const {id,user_id,created_at,updated_at,lead_tags,tagIds,...d}=form;
     d.value=Number(d.value)||0; d.action_date=d.action_date||null;
     if(existing){ updateLead(existing.id,d); setSub('info'); }
     else { const newId=await addLead(d); if(newId) onClose(); }

@@ -8,8 +8,13 @@ export function useLeads(){
   const [error,setError]=useState(null);
   const [userId,setUserId]=useState(null);
 
+  // Keep the current user's id in sync with auth state (initial session, login,
+  // logout, token refresh) so new leads are always stamped with the right owner.
   useEffect(()=>{
-    supabase.auth.getUser().then(({data})=>setUserId(data.user?.id??null));
+    const {data:{subscription}}=supabase.auth.onAuthStateChange(
+      (_event,session)=>setUserId(session?.user?.id??null)
+    );
+    return ()=>subscription.unsubscribe();
   },[]);
 
   const fetchAll=useCallback(async ()=>{
@@ -33,7 +38,12 @@ export function useLeads(){
   const run=async(op)=>{ const {error:e}=await op; if(e) setError(e.message); else fetchAll(); };
 
   const addLead=async(fields)=>{
-    const {data,error:e}=await supabase.from('leads').insert({...fields,user_id:userId}).select('id').single();
+    // Never persist an unowned lead on the shared board: if state hasn't caught up,
+    // read the session directly (local, no network) and refuse rather than write null.
+    let uid=userId;
+    if(!uid){ const {data:{session}}=await supabase.auth.getSession(); uid=session?.user?.id??null; }
+    if(!uid){ setError('You appear to be signed out — sign in again before adding a lead.'); return null; }
+    const {data,error:e}=await supabase.from('leads').insert({...fields,user_id:uid}).select('id').single();
     if(e){ setError(e.message); return null; }
     fetchAll(); return data?.id??null;
   };

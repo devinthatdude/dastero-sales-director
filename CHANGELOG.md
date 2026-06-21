@@ -11,11 +11,43 @@ small patches (0.1.0 → 0.1.1), the **middle** for new features (0.1.0 → 0.2.
 ---
 
 ## [Unreleased]
+### Security
+- **Deal-sheet XSS / HTML-injection fixed.** `printDealSheet` interpolated raw
+  lead fields (company, contact, notes, tags, etc.) into the print window with no
+  escaping. On a shared firm board with spreadsheet imports, a crafted value could
+  run script when another rep printed the sheet. All user values now run through an
+  `esc()` HTML-escaper (`src/components/LeadDetail.jsx`). Also fixes broken rendering
+  for benign values containing `&`, `<`, `>`, or `"`.
+- **Tag-color hex constraint (defense-in-depth).** New DB migration
+  `sql/2026-06-21_tags_color_hex_check.sql` adds a `CHECK` constraint so
+  `tags.color` must be valid hex (or NULL) at the write boundary. Run once in the
+  Supabase SQL editor.
+- **Leads RLS — "see all, edit own."** New migration
+  `sql/2026-06-21_leads_rls_edit_own.sql` rebuilds the `leads` policies: any
+  authenticated user reads (shared board preserved), members insert/update only
+  their own rows, deletes are admin-only. Adds a `public.is_admin()` helper. This
+  scopes editing server-side; it does not restrict visibility.
+### Fixed
+- **Lead owner no longer races auth.** `useLeads` stamped new leads with a
+  `userId` set by a one-shot `getUser()` that could still be `null` at insert,
+  silently creating unowned leads. Now synced via `onAuthStateChange` (with
+  cleanup) and the insert refuses to write a lead with no owner.
+- **Editing a lead can no longer touch its owner.** The save handler stripped a
+  non-existent `owner_id` field while leaving the real `user_id` in the update
+  payload (`LeadDetail.jsx`); it now strips `user_id`, so edits never resend or
+  reassign ownership.
+- **Blocked pop-ups no longer crash the print action.** `printDealSheet` called
+  `w.document.write` without checking `window.open`'s result; when pop-ups were
+  blocked it threw on `null`. It now detects the blocked pop-up and shows a clear
+  message instead.
 ### Added
 - Full Vite project scaffolding (package.json, vite/tailwind/postcss config,
   index.html, src/main.jsx) — the project now runs with `npm install && npm run dev`.
 ### Changed
 - Removed unused `owners` lookup + its profiles query; lighter load.
+- **CSV export is now admin-only.** The "↓ CSV" button on the Leads tab is gated
+  behind `isAdmin` (`LeadsTab.jsx`). Note: this is a UI policy gate, not data
+  access control — see the security note below.
 ### Fixed
 - Add (+) button no longer overlaps the Today tab's sign-out control.
 
