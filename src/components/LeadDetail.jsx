@@ -1,6 +1,6 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
 import { useEffect, useState } from 'react';
-import { STAGES, SERVICES, SOURCES, urgency, TONE, money } from '../lib/pipeline';
+import { STAGES, SERVICES, SOURCES, urgency, TONE, money, repName } from '../lib/pipeline';
 
 // Escape every user-controlled value before it enters the deal-sheet HTML.
 // Leads are shared firm-wide and some fields come from imported spreadsheets,
@@ -148,7 +148,7 @@ function Info({lead,tags,profiles,u,setStage,isAdmin,onDelete,onPrint}){
         {lead.phone && <a href={`tel:${lead.phone}`} className="surface rounded-xl py-3 text-center text-sm font-semibold text-white">📞 Call</a>}
         {lead.email && <a href={`mailto:${lead.email}`} className="surface rounded-xl py-3 text-center text-sm font-semibold text-white">✉️ Email</a>}
       </div>
-      {owner && <div className="text-xs dim">Owner: <span className="text-white font-semibold">{owner.full_name||owner.email}</span></div>}
+      {owner && <div className="text-xs dim">Owner: <span className="text-white font-semibold">{repName(owner)}</span></div>}
       <button onClick={onPrint} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#2FB6C8',background:'rgba(47,182,200,.08)',border:'1px solid rgba(47,182,200,.2)'}}>🖨 Print deal sheet</button>
       {isAdmin && <button onClick={onDelete} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#F0584E',background:'rgba(240,88,78,.1)'}}>Delete lead</button>}
     </div>

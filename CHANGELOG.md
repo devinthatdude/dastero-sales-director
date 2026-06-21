@@ -40,6 +40,11 @@ small patches (0.1.0 → 0.1.1), the **middle** for new features (0.1.0 → 0.2.
   `w.document.write` without checking `window.open`'s result; when pop-ups were
   blocked it threw on `null`. It now detects the blocked pop-up and shows a clear
   message instead.
+- **Rep leaderboard no longer crashes on a profile with no email.** `StatsTab`
+  called `p.email.split('@')` unconditionally; a null email white-screened the
+  whole tab. Now uses a shared `repName(p)` helper (`lib/pipeline.js`) that falls
+  back to the email local-part, then `Rep <id>` — reused for the lead-owner label
+  in `LeadDetail` so rep names render consistently everywhere.
 ### Added
 - Full Vite project scaffolding (package.json, vite/tailwind/postcss config,
   index.html, src/main.jsx) — the project now runs with `npm install && npm run dev`.

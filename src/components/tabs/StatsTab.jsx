@@ -1,5 +1,5 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
-import { STAGES, OPEN_STAGES, money } from '../../lib/pipeline';
+import { STAGES, OPEN_STAGES, money, repName } from '../../lib/pipeline';
 
 function Bar({label,value,max,color}){
   const pct=max>0?Math.round(value/max*100):0;
@@ -34,7 +34,7 @@ export default function StatsTab({ leads, tags, profiles=[], isAdmin }){
     const open=repLeads.filter(l=>OPEN_STAGES.includes(l.stage));
     const won=repLeads.filter(l=>l.stage==='closed_won');
     return {
-      name: p.full_name || p.email.split('@')[0],
+      name: repName(p),
       open: open.length,
       pipeline: open.reduce((s,l)=>s+ +l.value,0),
       won: won.reduce((s,l)=>s+ +l.value,0),

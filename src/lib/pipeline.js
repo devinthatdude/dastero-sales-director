@@ -30,3 +30,8 @@ export function urgency(lead){
 }
 export const TONE = {fresh:'#2FB6C8',warm:'#F0A93C',cold:'#F0584E',won:'#35C28A',lost:'#626E8B',none:'#626E8B'};
 export const money = (n)=> '$'+(Number(n)||0).toLocaleString('en-US');
+// Display name for a profile/rep, resilient to a missing full_name or email.
+export function repName(p){
+  if(!p) return '—';
+  return p.full_name || (p.email ? p.email.split('@')[0] : `Rep ${(p.id||'').slice(0,6)}`);
+}
