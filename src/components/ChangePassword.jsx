@@ -37,9 +37,9 @@ export default function ChangePassword({ onClose }) {
         ) : (
           <>
             <input type="password" autoComplete="new-password" placeholder="New password"
-              value={pw} onChange={(e) => setPw(e.target.value)} className="input mb-3" />
+              value={pw} onChange={(e) => { setPw(e.target.value); setError(null); }} className="input mb-3" />
             <input type="password" autoComplete="new-password" placeholder="Confirm new password"
-              value={confirm} onChange={(e) => setConfirm(e.target.value)}
+              value={confirm} onChange={(e) => { setConfirm(e.target.value); setError(null); }}
               onKeyDown={(e) => e.key === 'Enter' && submit()} className="input mb-3" />
             <button onClick={submit} disabled={busy}
               className="w-full brandbtn rounded-xl py-2.5 text-sm font-semibold disabled:opacity-60">
