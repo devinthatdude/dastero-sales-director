@@ -4,16 +4,19 @@ import { supabase } from '../lib/supabaseClient';
 
 export default function Login() {
   const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
-  const send = async () => {
+  const signIn = async () => {
+    if (busy) return;
     setError(null);
-    const { error: e } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    });
-    if (e) setError(e.message); else setSent(true);
+    setBusy(true);
+    const { error: e } = await supabase.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    // Generic message on purpose — don't reveal whether the email exists.
+    if (e) setError('Invalid email or password.');
+    // On success, useAuth's onAuthStateChange listener renders the app.
   };
 
   return (
@@ -22,24 +25,31 @@ export default function Login() {
         <div className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold">Dastero Tech · Sales</div>
         <h1 className="text-2xl font-bold text-slate-800 mt-1 mb-5">Pipeline</h1>
 
-        {sent ? (
-          <p className="text-sm text-slate-600">Check your email for a sign-in link.</p>
-        ) : (
-          <>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && send()}
-              type="email"
-              placeholder="you@dasterotech.com"
-              className="w-full text-sm px-3 py-2.5 border border-slate-200 rounded-lg mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
-            />
-            <button onClick={send} className="w-full text-sm font-semibold bg-slate-800 text-white rounded-lg py-2.5">
-              Email me a sign-in link
-            </button>
-            {error && <p className="text-xs text-rose-600 mt-2">{error}</p>}
-          </>
-        )}
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          autoComplete="email"
+          placeholder="you@dasterotech.com"
+          className="w-full text-sm px-3 py-2.5 border border-slate-200 rounded-lg mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+        />
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && signIn()}
+          type="password"
+          autoComplete="current-password"
+          placeholder="Password"
+          className="w-full text-sm px-3 py-2.5 border border-slate-200 rounded-lg mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+        />
+        <button
+          onClick={signIn}
+          disabled={busy}
+          className="w-full text-sm font-semibold bg-slate-800 text-white rounded-lg py-2.5 disabled:opacity-60"
+        >
+          {busy ? 'Signing in…' : 'Sign in'}
+        </button>
+        {error && <p className="text-xs text-rose-600 mt-2">{error}</p>}
       </div>
     </div>
   );
