@@ -53,6 +53,11 @@ small patches (0.1.0 → 0.1.1), the **middle** for new features (0.1.0 → 0.2.
 - **CSV export is now admin-only.** The "↓ CSV" button on the Leads tab is gated
   behind `isAdmin` (`LeadsTab.jsx`). Note: this is a UI policy gate, not data
   access control — see the security note below.
+- **Auth switched to email + password.** Sign-in now uses email + password
+  (`signInWithPassword`); accounts are created by an admin in the Supabase
+  dashboard (invite-only), and logged-in reps can change their own password.
+### Removed
+- **Magic-link sign-in** (`signInWithOtp`) — replaced by email + password.
 ### Fixed
 - Add (+) button no longer overlaps the Today tab's sign-out control.
 

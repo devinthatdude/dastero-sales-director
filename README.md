@@ -22,13 +22,24 @@ React + Vite + Tailwind + Supabase. This is a complete, ready-to-run project.
    ```bash
    npm run dev
    ```
-   Open the URL it prints (usually http://localhost:5173) and sign in with your email.
+   Open the URL it prints (usually http://localhost:5173) and sign in with your
+   email and password. Accounts are created by an admin in the Supabase dashboard
+   (Authentication → Users → Add user); there is no public sign-up.
 
 ## First admin
 After your first sign-in, run this once in the Supabase SQL editor:
 ```sql
 update public.profiles set role = 'admin' where email = 'you@dasterotech.com';
 ```
+
+## Auth (email + password)
+- Sign-in is email + password. There is **no public sign-up** — disable it at
+  Authentication → Providers → Email → "Allow new users to sign up".
+- Add a rep: Authentication → Users → Add user (set email + a temporary password),
+  then share it; the rep changes it in-app (Today → Change password).
+- Make someone admin / set their name: `update public.profiles set role='admin',
+  full_name='…' where email='…';`
+- Reset a forgotten password: Authentication → Users → set a new password.
 
 ## Database hardening
 One-time SQL migrations live in `sql/`. Run each once in the Supabase SQL editor:
