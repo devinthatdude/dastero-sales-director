@@ -45,6 +45,8 @@ update public.profiles set role = 'admin' where email = 'you@dasterotech.com';
 One-time SQL migrations live in `sql/`. Run each once in the Supabase SQL editor:
 - `sql/2026-06-21_tags_color_hex_check.sql` — constrains `tags.color` to valid hex.
 - `sql/2026-06-21_leads_rls_edit_own.sql` — leads RLS: read-all, edit-own, admin-delete.
+- `sql/2026-06-23_profiles_autocreate.sql` — trigger: new auth users get a profiles row (role 'member'). **Run this, or dashboard-created reps have no profile and load a blank/degraded UI.**
+- `sql/2026-06-23_profiles_admin_read.sql` — profiles RLS: self-read + admin-read-all.
 
 ## Deploy (Vercel)
 Push to GitHub → import in Vercel → add the two env vars → deploy →
