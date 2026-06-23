@@ -1,8 +1,11 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
+import { useState } from 'react';
 import { daysUntil, money, OPEN_STAGES } from '../../lib/pipeline';
 import LeadCard from '../LeadCard';
+import ChangePassword from '../ChangePassword';
 
 export default function TodayTab({ leads, tags, onOpen, onSignOut }){
+  const [pwOpen, setPwOpen] = useState(false);
   const now=new Date(); const hr=now.getHours();
   const greet=hr<12?'Good morning.':hr<18?'Good afternoon.':'Good evening.';
   const dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
@@ -22,7 +25,10 @@ export default function TodayTab({ leads, tags, onOpen, onSignOut }){
           <h1 className="text-3xl font-bold text-white mt-0.5">{greet}</h1>
           <div className="soft text-sm mt-1">Here's what needs your attention today.</div>
         </div>
-        <button onClick={onSignOut} className="dim text-xs font-semibold mt-1">Sign out</button>
+        <div className="flex flex-col items-end gap-1 mt-1">
+          <button onClick={onSignOut} className="dim text-xs font-semibold">Sign out</button>
+          <button onClick={() => setPwOpen(true)} className="dim text-xs font-semibold">Change password</button>
+        </div>
       </div>
 
       <div className="surface rounded-2xl p-5 mt-5">
@@ -47,6 +53,7 @@ export default function TodayTab({ leads, tags, onOpen, onSignOut }){
         </>
       )}
       {leads.length===0 && <div className="dim text-sm text-center py-10">No leads yet — tap + to add your first.</div>}
+      {pwOpen && <ChangePassword onClose={() => setPwOpen(false)} />}
     </div>
   );
 }
