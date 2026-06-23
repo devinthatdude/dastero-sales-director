@@ -12,11 +12,14 @@ export default function Login() {
     if (busy) return;
     setError(null);
     setBusy(true);
-    const { error: e } = await supabase.auth.signInWithPassword({ email, password });
-    setBusy(false);
-    // Generic message on purpose — don't reveal whether the email exists.
-    if (e) setError('Invalid email or password.');
-    // On success, useAuth's onAuthStateChange listener renders the app.
+    try {
+      const { error: e } = await supabase.auth.signInWithPassword({ email, password });
+      // Generic message on purpose — don't reveal whether the email exists.
+      if (e) setError('Invalid email or password.');
+      // On success, useAuth's onAuthStateChange listener renders the app.
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
