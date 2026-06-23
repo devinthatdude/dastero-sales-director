@@ -1,125 +1,111 @@
 # Design — Email + Password Authentication
 
-**Date:** 2026-06-22
+**Date:** 2026-06-22 (revised 2026-06-23)
 **Status:** Approved (pending spec review)
-**Scope:** Replace magic-link sign-in with email + password, admin-provisioned accounts.
+**Scope:** Replace magic-link sign-in with email + password. Accounts created by an
+admin in the Supabase dashboard (no in-app admin backend).
 
 ---
 
 ## 1. Goal
 
-Switch the app's authentication from passwordless magic-link to **email + password**,
-with accounts created by an admin (invite-only), not self-service.
+Switch authentication from passwordless magic-link to **email + password**, with
+accounts created by an admin (invite-only), not self-service. Keep the build small
+and deploy-free: no Edge Function, no service-role key anywhere in the project.
 
 ## 2. Locked decisions
 
 | Decision | Choice |
 |---|---|
 | Login method | Email + password (`signInWithPassword`). Magic link **removed entirely**. |
-| Account creation | **Admin invite-only** — no public sign-up page. |
-| Where admin provisions | **In-app admin screen**, backed by a Supabase **Edge Function**. |
-| First password | **Admin sets an initial password** (option A) and shares it with the rep. |
-| Change password | Logged-in reps can change their own password (`updateUser`). |
-| Forgot password (logged out) | **Admin-handled only** — no self-service reset page. |
-| Session persistence | Unchanged — localStorage + auto-refresh (already "stay signed in on device"). |
+| Account creation | **Admin invite-only**, done in the **Supabase dashboard** (no in-app screen, no Edge Function). |
+| First password | Admin sets it in the dashboard and shares it with the rep. |
+| Change password | Logged-in reps can change their own password in-app (`updateUser`). |
+| Forgot password (logged out) | **Admin-handled** — admin resets in the dashboard. No self-service page. |
+| Role / name | Default `role = 'member'` via DB trigger; admin promotes or sets `full_name` via SQL (the existing first-admin pattern). `full_name` is optional — UI falls back to email local-part via `repName()`. |
+| Session persistence | Unchanged — localStorage + auto-refresh. |
 
 ## 3. Why this shape
 
-The lead board is shared: any authenticated user sees every lead, so account
-creation *is* access control. Invite-only prevents self-enrollment. User creation
-requires the service-role key, which must never reach the browser — hence the Edge
-Function as the only privileged surface. Option A (admin-set password) avoids
-building a logged-out token-handling page, matching the "no self-service" choice;
-the logged-in change-password gives reps a way to own their secret afterward.
+The lead board is shared, so account creation *is* access control — hence
+invite-only with no public sign-up. Creating users needs the service-role key, which
+must never reach the browser; rather than build a backend to hold it, we use the
+Supabase dashboard, which already holds it securely. For an internal app that adds
+reps rarely, dashboard provisioning is the right YAGNI tradeoff: identical end-user
+experience, zero deploy, zero new backend surface.
 
-## 4. Components
+## 4. Components (all in-app, no deploy)
 
 ### 4.1 `Login.jsx` (rewrite)
 - Email + password fields → `supabase.auth.signInWithPassword({ email, password })`.
-- Clear error on invalid credentials ("Invalid email or password").
+- Clear error on failure ("Invalid email or password").
 - Remove `signInWithOtp`, the `sent` state, and the "check your email" copy.
-- No sign-up link (invite-only).
+- **No sign-up link** (invite-only).
 
-### 4.2 Admin "Add rep" screen (new, in-app, admin-only)
-- Gated by `isAdmin`; reachable from an admin area (e.g., a new tab or a section
-  surfaced only to admins).
-- **Create form:** email, full name, role (member/admin), initial password.
-- **Reset action:** for an existing rep, set a new password.
-- Both call the Edge Function via `supabase.functions.invoke('provision-user', …)`
-  (the caller's JWT is attached automatically).
+### 4.2 Change-password (new, logged-in)
+- A small control near the existing Sign Out button → modal/section with
+  new-password (+ confirm) → `supabase.auth.updateUser({ password })`.
+- Available to any logged-in user for their own account.
 
-### 4.3 Edge Function `provision-user` (new)
-- Runtime: Supabase Edge Function (Deno/TypeScript).
-- Secrets: `SUPABASE_SERVICE_ROLE_KEY` (function secret). `SUPABASE_URL` is provided
-  by the platform.
-- **Authorization:** read the caller's JWT from the `Authorization` header →
-  `getUser()` to identify them → with a service-role client, read their
-  `profiles.role`. Reject with **403** unless `role = 'admin'`.
-- **Actions:**
-  - `create`: `auth.admin.createUser({ email, password, email_confirm: true,
-    user_metadata: { full_name } })`, then upsert the `profiles` row with
-    `{ id, email, full_name, role }`.
-  - `reset`: `auth.admin.updateUserById(id, { password })`.
-- Returns a minimal JSON result; never returns the service-role key or tokens.
-
-### 4.4 Change-password (logged-in)
-- A small control (near the existing Sign Out button) → modal/section →
-  `supabase.auth.updateUser({ password })`.
+*(No admin screen, no Edge Function — provisioning/resets happen in the dashboard.)*
 
 ## 5. Data flow
 
-**Login:** user enters email+password → `signInWithPassword` → session persisted →
-`useAuth` loads profile → app renders. (Unchanged downstream.)
+**Login:** email + password → `signInWithPassword` → session persisted → `useAuth`
+loads profile → app renders. (Downstream unchanged.)
 
-**Provision:** admin submits form → `functions.invoke('provision-user', {action:'create', …})`
-→ function verifies admin → creates auth user + profiles row → returns success →
-admin tells rep their initial password → rep logs in → optionally changes password.
+**Add a rep (admin, dashboard):** Authentication → Users → Add user (email + initial
+password, auto-confirm) → DB trigger creates the `profiles` row (role `member`) →
+admin shares the password → rep logs in → rep optionally changes their password
+in-app. To make someone an admin or set their name, admin runs the existing SQL
+(`update public.profiles set role='admin'/full_name=… where email=…`).
 
-**Reset:** admin picks a rep + new password → `provision-user {action:'reset'}` →
-function sets password → admin tells rep.
+**Reset a password (admin, dashboard):** Authentication → Users → pick user → set a
+new password → share it.
 
 ## 6. Database requirements
 
-- **`profiles` auto-creation:** new auth users must get a `profiles` row.
-  - **VERIFY:** does a `handle_new_user` trigger on `auth.users` already exist?
-    (Existing magic-link users have profiles, so probably yes.)
-  - The Edge Function upserts the profiles row regardless, so creation is correct
-    whether or not the trigger fires. If no trigger exists, the function is the sole
-    creator — acceptable, since all users now come through the function.
-- **`profiles` RLS:** admins must read all profiles (the admin screen + `useProfiles`
-  + StatsTab need this); members read their own. The Edge Function uses the
-  service-role client and bypasses RLS. **VERIFY** current profiles policies; add an
-  admin-read policy if missing (a migration in `sql/`).
+- **`profiles` auto-creation (now critical).** Dashboard-created users only get a
+  `profiles` row if a trigger creates one — there is no Edge Function fallback in
+  this path.
+  - **VERIFY:** does a `handle_new_user` trigger on `auth.users` exist? (Existing
+    magic-link users have profiles, so likely yes.)
+  - If missing, add it as a `sql/` migration: on new `auth.users` row, insert
+    `profiles (id, email, role='member')`.
+- **`profiles` RLS:** admins read all profiles (needed by `useProfiles` + StatsTab),
+  members read their own. **VERIFY** current policies; add an admin-read policy via a
+  `sql/` migration if missing.
 
 ## 7. Security considerations
 
-- Service-role key lives **only** in the Edge Function secret — never in client code
-  or `.env` shipped to the browser.
-- The function **must** verify the caller is an admin before any privileged call;
-  this is the entire access boundary for user creation.
-- Option A shares a password out-of-band (weaker than rep-chosen). Mitigated by the
-  logged-in change-password. Document that admins should set a unique temporary
-  password per rep and have them change it.
-- Password policy: enforce Supabase's minimum (set a reasonable minimum length in
-  Auth settings, e.g. 8+).
+- **Disable public sign-ups (critical).** With email auth, the public anon key in the
+  browser can call `signUp()` directly — so even without a sign-up button, a stranger
+  could self-register unless sign-ups are turned off. In Supabase: Authentication →
+  Providers → Email → **disable "Allow new users to sign up."** This is what actually
+  enforces invite-only.
+- No service-role key in the project at all (the whole point of this path).
+- Option-A passwords are shared out-of-band; the in-app change-password lets reps
+  replace them. Document: set a unique temporary password per rep.
+- Set a sensible **minimum password length** in Auth settings (e.g. 8+).
 
-## 8. Prerequisites / operational steps (user-run, outside app code)
+## 8. Prerequisites / operational steps (user-run, dashboard)
 
-1. Deploy the Edge Function (Supabase CLI `supabase functions deploy provision-user`,
-   or dashboard) and set the `SUPABASE_SERVICE_ROLE_KEY` secret.
-2. Set the owner's first password from the dashboard (Authentication → Users) so the
-   owner can log in under the new system.
-3. Run any `profiles` RLS / trigger migration produced by this work.
-4. Confirm a sensible minimum password length in Auth settings.
+1. **Disable "Allow new users to sign up"** (Authentication → Providers → Email) —
+   enforces invite-only. *Do this as part of the rollout.*
+2. Set the owner's first password (Authentication → Users) so the owner can log in.
+3. Confirm/create the `handle_new_user` trigger (migration if missing).
+4. Confirm/add the `profiles` admin-read RLS policy (migration if missing).
+5. Set a minimum password length in Auth settings.
 
 ## 9. Out of scope (YAGNI)
 
+- In-app admin "Add rep" screen and the Edge Function (chosen against).
 - Self-service logged-out "forgot password" page.
 - Magic link / OTP, social login, MFA.
-- Bulk user import, org/team hierarchy.
 
 ## 10. Open items to confirm during implementation
 
-- Presence of the `handle_new_user` trigger and current `profiles` RLS policies.
-- Where the admin screen lives (new bottom-nav tab vs. a section in an existing
-  admin-only view) — a UI placement decision to settle in the plan.
+- Presence of the `handle_new_user` trigger and current `profiles` RLS policies
+  (drives whether §6 migrations are needed).
+- Exact placement of the in-app change-password control (near Sign Out — settle in
+  the plan).
