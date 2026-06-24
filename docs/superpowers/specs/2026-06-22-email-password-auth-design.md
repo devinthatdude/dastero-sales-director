@@ -5,6 +5,12 @@
 **Scope:** Replace magic-link sign-in with email + password. Accounts created by an
 admin in the Supabase dashboard (no in-app admin backend).
 
+> **Later revision (2026-06-23):** magic-link sign-in was *re-added alongside*
+> email + password rather than removed. The login screen now offers both; the
+> magic-link request uses `shouldCreateUser:false` so it stays invite-only (only
+> existing users get a link). This supersedes the "magic link removed entirely"
+> decision in §2/§9 below.
+
 ---
 
 ## 1. Goal
