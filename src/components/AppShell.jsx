@@ -23,7 +23,7 @@ const TABS=[
 export default function AppShell({ profile, isAdmin, onSignOut }){
   const data=useLeads();
   const tags=useTags();
-  const profiles=useProfiles(isAdmin);
+  const profiles=useProfiles();
   const [tab,setTab]=useState('today');
   const [detail,setDetail]=useState(null);
 
