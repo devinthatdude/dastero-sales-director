@@ -51,7 +51,7 @@ function printDealSheet(lead, tags){
 const empty={company:'',contact_name:'',contact_title:'',industry:'',source:'Cold Outreach',
   stage:'prospect',value:0,phone:'',email:'',address:'',services:[],next_action:'',action_date:'',notes:''};
 
-export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, addLead, updateLead, deleteLead, setLeadTags, onClose }){
+export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, userId, addLead, updateLead, deleteLead, setLeadTags, onClose }){
   const existing = leadId ? leads.find(l=>l.id===leadId) : null;
   const [sub,setSub]=useState(leadId?'info':'edit');
   const [form,setForm]=useState(empty);
@@ -97,7 +97,7 @@ export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, 
         </div>
 
         <div className="p-5">
-          {sub==='info'   && existing && <Info lead={existing} tags={tags} profiles={profiles} u={u} setStage={setStage} isAdmin={isAdmin} onDelete={()=>{deleteLead(existing.id);onClose();}} onPrint={()=>printDealSheet(existing,tags)} />}
+          {sub==='info'   && existing && <Info lead={existing} tags={tags} profiles={profiles} u={u} setStage={setStage} canDelete={isAdmin || existing.user_id===userId} onDelete={()=>{deleteLead(existing.id);onClose();}} onPrint={()=>printDealSheet(existing,tags)} />}
           {sub==='edit'   && <Edit form={form} set={set} toggleService={toggleService} save={save} isNew={!existing} />}
           {sub==='tags'   && existing && <Tags tags={tags} active={existing.tagIds||[]} toggle={toggleTag} />}
           {sub==='cadence'&& existing && (
@@ -113,7 +113,7 @@ export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, 
 
 function Row({k,v}){ return <div><div className="dim text-[11px] uppercase tracking-wide font-semibold">{k}</div><div className="text-white text-sm mt-0.5">{v||'—'}</div></div>; }
 
-function Info({lead,tags,profiles,u,setStage,isAdmin,onDelete,onPrint}){
+function Info({lead,tags,profiles,u,setStage,canDelete,onDelete,onPrint}){
   const leadTags=(lead.tagIds||[]).map(id=>tags.find(t=>t.id===id)).filter(Boolean);
   const owner=profiles.find(p=>p.id===lead.user_id);
   return (
@@ -150,7 +150,7 @@ function Info({lead,tags,profiles,u,setStage,isAdmin,onDelete,onPrint}){
       </div>
       {owner && <div className="text-xs dim">Owner: <span className="text-white font-semibold">{repName(owner)}</span></div>}
       <button onClick={onPrint} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#2FB6C8',background:'rgba(47,182,200,.08)',border:'1px solid rgba(47,182,200,.2)'}}>🖨 Print deal sheet</button>
-      {isAdmin && <button onClick={onDelete} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#F0584E',background:'rgba(240,88,78,.1)'}}>Delete lead</button>}
+      {canDelete && <button onClick={onDelete} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#F0584E',background:'rgba(240,88,78,.1)'}}>Delete lead</button>}
     </div>
   );
 }
