@@ -1,7 +1,7 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
 import { useState } from 'react';
 import LeadCard from '../LeadCard';
-import { money } from '../../lib/pipeline';
+import { money, repName } from '../../lib/pipeline';
 
 function exportCSV(leads){
   const headers=['Company','Contact','Title','Industry','Stage','Value','Phone','Email','Address','Source','Services','Next Action','Action Date','Notes'];
@@ -17,9 +17,20 @@ function exportCSV(leads){
   a.click();
 }
 
-export default function LeadsTab({ leads, tags, isAdmin, onOpen }){
+export default function LeadsTab({ leads, tags, isAdmin, profiles=[], onOpen }){
   const [q,setQ]=useState('');
-  const filtered=leads.filter(l=>(`${l.company} ${l.contact_name||''} ${l.industry||''}`).toLowerCase().includes(q.toLowerCase()));
+  const [ownerId,setOwnerId]=useState('');
+
+  // Owners that actually own at least one lead, named via repName (falls back to "Rep <id>").
+  const owners=[...new Set(leads.map(l=>l.user_id).filter(Boolean))]
+    .map(id=>({ id, name: repName(profiles.find(p=>p.id===id) || { id }) }))
+    .sort((a,b)=>a.name.localeCompare(b.name));
+
+  const filtered=leads.filter(l=>{
+    const matchesText=(`${l.company} ${l.contact_name||''} ${l.industry||''}`).toLowerCase().includes(q.toLowerCase());
+    const matchesOwner=ownerId==='' || l.user_id===ownerId;
+    return matchesText && matchesOwner;
+  });
 
   return (
     <div className="px-4 pt-5">
@@ -36,7 +47,13 @@ export default function LeadsTab({ leads, tags, isAdmin, onOpen }){
           </button>
         )}
       </div>
-      <input className="input mb-4" placeholder="Search company, contact, industry…" value={q} onChange={e=>setQ(e.target.value)} />
+      <div className="flex gap-2 mb-4">
+        <input className="input flex-1" placeholder="Search company, contact, industry…" value={q} onChange={e=>setQ(e.target.value)} />
+        <select className="input" style={{maxWidth:'10rem'}} value={ownerId} onChange={e=>setOwnerId(e.target.value)}>
+          <option value="">All owners</option>
+          {owners.map(o=> <option key={o.id} value={o.id}>{o.name}</option>)}
+        </select>
+      </div>
       {filtered.length===0
         ? <div className="dim text-sm py-10 text-center">{leads.length===0?'No leads yet — tap + to add one.':'No leads match.'}</div>
         : filtered.map(l=> <LeadCard key={l.id} lead={l} tags={tags} onOpen={onOpen} />)}
