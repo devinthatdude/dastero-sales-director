@@ -48,8 +48,15 @@ small patches (0.1.0 → 0.1.1), the **middle** for new features (0.1.0 → 0.2.
 ### Added
 - Full Vite project scaffolding (package.json, vite/tailwind/postcss config,
   index.html, src/main.jsx) — the project now runs with `npm install && npm run dev`.
+- **Leads owner filter.** The Leads tab has an "owner" dropdown to view any
+  teammate's leads, alongside the text search (`LeadsTab.jsx`).
+- **Reps can delete their own leads.** The delete button now shows for a lead's
+  owner (admins keep delete-any), enforced by RLS
+  (`sql/2026-06-23_leads_delete_own.sql`).
 ### Changed
 - Removed unused `owners` lookup + its profiles query; lighter load.
+- **Profiles are readable by all signed-in users** (was self-or-admin) so the
+  owner filter can show teammate names (`sql/2026-06-23_profiles_read_all.sql`).
 - **CSV export is now admin-only.** The "↓ CSV" button on the Leads tab is gated
   behind `isAdmin` (`LeadsTab.jsx`). Note: this is a UI policy gate, not data
   access control — see the security note below.

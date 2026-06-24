@@ -47,6 +47,8 @@ One-time SQL migrations live in `sql/`. Run each once in the Supabase SQL editor
 - `sql/2026-06-21_leads_rls_edit_own.sql` — leads RLS: read-all, edit-own, admin-delete.
 - `sql/2026-06-23_profiles_autocreate.sql` — trigger: new auth users get a profiles row (role 'member'). **Run this, or dashboard-created reps have no profile and load a blank/degraded UI.**
 - `sql/2026-06-23_profiles_admin_read.sql` — profiles RLS: self-read + admin-read-all.
+- `sql/2026-06-23_profiles_read_all.sql` — profiles readable by all signed-in users (for the owner filter).
+- `sql/2026-06-23_leads_delete_own.sql` — leads delete: owner-or-admin.
 
 ## Deploy (Vercel)
 Push to GitHub → import in Vercel → add the two env vars → deploy →
