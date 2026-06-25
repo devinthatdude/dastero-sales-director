@@ -26,8 +26,8 @@ export default function LeadCard({ lead, tags, draggable=false, onOpen, onLongPr
       style={{borderLeftColor:c,borderLeftWidth:'3px'}}
     >
       <div className="flex justify-between items-baseline gap-2">
-        <span className="font-semibold text-sm text-white leading-tight">{lead.company}</span>
-        <span className="font-semibold text-sm whitespace-nowrap" style={{color:'#E9EEF8'}}>{money(lead.value)}</span>
+        <span className="font-semibold text-sm leading-tight">{lead.company}</span>
+        <span className="font-semibold text-sm whitespace-nowrap mono" style={{color:'#0C1626'}}>{money(lead.value)}</span>
       </div>
       {lead.contact_name && (
         <div className="text-xs soft mt-0.5">{lead.contact_name}{lead.contact_title?` · ${lead.contact_title}`:''}</div>
@@ -36,7 +36,7 @@ export default function LeadCard({ lead, tags, draggable=false, onOpen, onLongPr
         <div className="flex flex-wrap gap-1 mt-2">
           {lead.services.map(s=>(
             <span key={s} className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-              style={{background:'rgba(53,194,138,.14)',color:'#35C28A'}}>{s}</span>
+              style={{background:'rgba(27,158,110,.12)',color:'#1B9E6E'}}>{s}</span>
           ))}
         </div>
       )}
