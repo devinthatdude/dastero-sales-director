@@ -1,13 +1,13 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
 // Stages match the old app's funnel; colors match its legend.
 export const STAGES = [
-  { id:'prospect',           name:'Prospect',           color:'#9AA6C0' },
-  { id:'qualified',          name:'Qualified',          color:'#4C9AFF' },
-  { id:'discovery_done',     name:'Discovery Done',     color:'#9B8CFF' },
-  { id:'solution_presented', name:'Solution Presented', color:'#F0C53C' },
-  { id:'negotiating',        name:'Negotiating',        color:'#F0A93C' },
-  { id:'closed_won',         name:'Closed Won',         color:'#35C28A' },
-  { id:'closed_lost',        name:'Closed Lost',        color:'#626E8B' },
+  { id:'prospect',           name:'Prospect',           color:'#7C8AA6' },
+  { id:'qualified',          name:'Qualified',          color:'#2F6BF0' },
+  { id:'discovery_done',     name:'Discovery Done',     color:'#6E5BE0' },
+  { id:'solution_presented', name:'Solution Presented', color:'#C7891B' },
+  { id:'negotiating',        name:'Negotiating',        color:'#D98A2B' },
+  { id:'closed_won',         name:'Closed Won',         color:'#1B9E6E' },
+  { id:'closed_lost',        name:'Closed Lost',        color:'#92A0B8' },
 ];
 export const OPEN_STAGES = ['prospect','qualified','discovery_done','solution_presented','negotiating'];
 export const SERVICES = ['Managed IT','Network & Security','Surveillance','M365 / Workspace','Website','Branding'];
@@ -28,7 +28,7 @@ export function urgency(lead){
   if(d===0) return {tone:'warm',label:'Due today'};
   return {tone:'fresh',label:`in ${d}d`};
 }
-export const TONE = {fresh:'#2FB6C8',warm:'#F0A93C',cold:'#F0584E',won:'#35C28A',lost:'#626E8B',none:'#626E8B'};
+export const TONE = {fresh:'#14B5C0',warm:'#D98A2B',cold:'#DC4B43',won:'#1B9E6E',lost:'#92A0B8',none:'#92A0B8'};
 export const money = (n)=> '$'+(Number(n)||0).toLocaleString('en-US');
 // Display name for a profile/rep, resilient to a missing full_name or email.
 export function repName(p){
