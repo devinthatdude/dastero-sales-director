@@ -1,21 +1,25 @@
 /* © 2026 Dastero Tech LLC — All rights reserved. See LICENSE. */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root{
-  --bg:#0A0E1A; --panel:#121A2C; --card:#172033; --cardh:#1D2840; --line:#26314B;
-  --brand:#3B6FF0; --brand2:#2E5BD6; --cyan:#2FB6C8; --amber:#F0A93C;
-  --rose:#F0584E; --green:#35C28A; --text:#E9EEF8; --soft:#9AA6C0; --dim:#626E8B;
+  --bg:#EEF2F9; --panel:#FFFFFF; --card:#FFFFFF; --cardh:#F4F7FC; --line:#DCE4F1;
+  --brand:#2F6BF0; --brand2:#1E4FC8; --cyan:#14B5C0; --amber:#D98A2B;
+  --rose:#DC4B43; --green:#1B9E6E; --text:#0C1626; --soft:#5C6B85; --dim:#92A0B8;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-h1,h2{font-family:'Space Grotesk',sans-serif}
+body{margin:0;background:radial-gradient(120% 80% at 80% -10%, #E5ECF8 0%, var(--bg) 55%);
+  color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2{font-family:'Archivo',sans-serif;letter-spacing:-.01em}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-feature-settings:"tnum" 1}
 .panel{background:var(--panel);border:1px solid var(--line)}
-.surface{background:var(--card);border:1px solid var(--line)}
+.surface{background:var(--card);border:1px solid var(--line);box-shadow:0 10px 24px -20px rgba(12,22,38,.45)}
 .soft{color:var(--soft)} .dim{color:var(--dim)}
-.brandbtn{background:linear-gradient(180deg,var(--brand),var(--brand2));color:#fff;border:none}
-.input{width:100%;font-family:'Inter',sans-serif;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--text)}
-.input:focus{outline:2px solid var(--cyan);border-color:var(--cyan)}
+.brandbtn{background:linear-gradient(160deg,var(--brand),var(--brand2));color:#fff;border:none;
+  box-shadow:0 10px 20px -8px rgba(47,107,240,.6)}
+.input{width:100%;font-family:'Inter',sans-serif;font-size:14px;padding:9px 11px;border:1px solid var(--line);
+  border-radius:9px;background:#fff;color:var(--text)}
+.input:focus{outline:2px solid var(--brand);border-color:var(--brand)}
 @media (prefers-reduced-motion: reduce){*{transition:none !important}}
