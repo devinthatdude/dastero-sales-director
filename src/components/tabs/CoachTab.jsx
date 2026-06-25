@@ -17,16 +17,16 @@ const SHEETS=[
 export default function CoachTab(){
   return (
     <div className="px-4 pt-5">
-      <div className="text-[11px] uppercase tracking-widest font-semibold" style={{color:'#2FB6C8'}}>Sales Coach</div>
-      <h1 className="text-3xl font-bold text-white mt-0.5 mb-1">Service Cheat Sheets</h1>
+      <div className="text-[11px] uppercase tracking-widest font-semibold" style={{color:'#2F6BF0'}}>Sales Coach</div>
+      <h1 className="text-3xl font-bold mt-0.5 mb-1">Service Cheat Sheets</h1>
       <div className="soft text-sm mb-4">Tap-ready openers to arm yourself mid-conversation.</div>
       {SHEETS.map(s=>(
         <div key={s.svc} className="surface rounded-2xl p-4 mb-3">
           <div className="text-2xl">{s.icon}</div>
-          <div className="font-bold text-lg text-white mt-1">{s.svc}</div>
+          <div className="font-bold text-lg mt-1">{s.svc}</div>
           <div className="soft italic text-sm mt-1">"{s.q}"</div>
           <ul className="mt-2 space-y-1">
-            {s.points.map((p,i)=> <li key={i} className="text-xs dim flex gap-2"><span style={{color:'#35C28A'}}>›</span><span>{p}</span></li>)}
+            {s.points.map((p,i)=> <li key={i} className="text-xs dim flex gap-2"><span style={{color:'#1B9E6E'}}>›</span><span>{p}</span></li>)}
           </ul>
         </div>
       ))}

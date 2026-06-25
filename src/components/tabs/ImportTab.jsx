@@ -70,8 +70,8 @@ export default function ImportTab({ addLead }){
 
   return (
     <div className="px-4 pt-5">
-      <div className="text-[11px] uppercase tracking-widest font-semibold" style={{color:'#2FB6C8'}}>Import</div>
-      <h1 className="text-3xl font-bold text-white mt-0.5 mb-1">Contacts</h1>
+      <div className="text-[11px] uppercase tracking-widest font-semibold" style={{color:'#2F6BF0'}}>Import</div>
+      <h1 className="text-3xl font-bold mt-0.5 mb-1">Contacts</h1>
       <div className="soft text-sm mb-4">Load an Excel list. Tap a number to call or text, or an email to open Outlook — each opens with a first-touch message ready.</div>
 
       <label className="block w-full panel rounded-2xl py-6 text-center soft font-semibold text-sm cursor-pointer" style={{borderStyle:'dashed'}}>
@@ -79,7 +79,7 @@ export default function ImportTab({ addLead }){
         <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={onFile} />
       </label>
 
-      {err && <div className="text-sm mt-3" style={{color:'#F0584E'}}>{err}</div>}
+      {err && <div className="text-sm mt-3" style={{color:'#DC4B43'}}>{err}</div>}
       {rows.length>0 && <div className="dim text-[13px] font-semibold mt-4 mb-2">{rows.length} contact{rows.length!==1?'s':''}</div>}
 
       {rows.map((r,i)=>{
@@ -87,34 +87,34 @@ export default function ImportTab({ addLead }){
         const sub = tplSub(c.company||c.name), body = tplBody(c.name);
         return (
           <div key={i} className="surface rounded-2xl p-3.5 mb-3">
-            <div className="font-bold text-white text-base">{c.name}</div>
+            <div className="font-bold text-base">{c.name}</div>
             {((c.company && c.company!==c.name) || c.title)
               ? <div className="soft text-[13px] mt-0.5">{[c.company!==c.name?c.company:'',c.title].filter(Boolean).join(' · ')}</div> : null}
 
             <div className="flex flex-col gap-2 mt-3">
               {c.phone && (
                 <div className="flex gap-2">
-                  <a href={`tel:${c.phone}`} className="flex-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5 panel text-white font-semibold text-sm" style={{border:'1px solid rgba(53,194,138,.4)'}}>
-                    <span style={{color:'#35C28A'}}>📞</span>
+                  <a href={`tel:${c.phone}`} className="flex-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5 panel font-semibold text-sm" style={{border:'1px solid rgba(27,158,110,.4)'}}>
+                    <span style={{color:'#1B9E6E'}}>📞</span>
                     <span className="flex flex-col leading-tight min-w-0"><span className="dim text-[11px] uppercase tracking-wide">Call</span><span className="truncate">{c.phoneRaw}</span></span>
                   </a>
-                  <a href={`sms:${c.phone}&body=${enc(tplSms(c.name))}`} className="rounded-xl px-4 flex items-center font-semibold text-[13px]" style={{border:'1px solid #26314B',color:'#2FB6C8'}}>💬 Text</a>
+                  <a href={`sms:${c.phone}&body=${enc(tplSms(c.name))}`} className="rounded-xl px-4 flex items-center font-semibold text-[13px]" style={{border:'1px solid #DCE4F1',color:'#2F6BF0'}}>💬 Text</a>
                 </div>
               )}
               {isEmail(c.email) && (
                 <div className="flex gap-2">
-                  <a href={`ms-outlook://compose?to=${enc(c.email)}&subject=${enc(sub)}&body=${enc(body)}`} className="flex-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5 panel text-white font-semibold text-sm" style={{border:'1px solid rgba(59,111,240,.4)'}}>
-                    <span style={{color:'#3B6FF0'}}>✉️</span>
+                  <a href={`ms-outlook://compose?to=${enc(c.email)}&subject=${enc(sub)}&body=${enc(body)}`} className="flex-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5 panel font-semibold text-sm" style={{border:'1px solid rgba(47,107,240,.4)'}}>
+                    <span style={{color:'#2F6BF0'}}>✉️</span>
                     <span className="flex flex-col leading-tight min-w-0"><span className="dim text-[11px] uppercase tracking-wide">Outlook</span><span className="truncate">{c.email}</span></span>
                   </a>
-                  <a href={`mailto:${enc(c.email)}?subject=${enc(sub)}&body=${enc(body)}`} className="rounded-xl px-4 flex items-center font-semibold text-[13px]" style={{border:'1px solid #26314B',color:'#2FB6C8'}}>Mail</a>
+                  <a href={`mailto:${enc(c.email)}?subject=${enc(sub)}&body=${enc(body)}`} className="rounded-xl px-4 flex items-center font-semibold text-[13px]" style={{border:'1px solid #DCE4F1',color:'#2F6BF0'}}>Mail</a>
                 </div>
               )}
             </div>
 
             <button onClick={()=>addAsLead(c,i)} disabled={added[i]}
               className="mt-3 text-[13px] font-semibold rounded-lg px-3 py-1.5"
-              style={{color:added[i]?'#626E8B':'#35C28A',background:added[i]?'transparent':'rgba(53,194,138,.12)'}}>
+              style={{color:added[i]?'#92A0B8':'#1B9E6E',background:added[i]?'transparent':'rgba(27,158,110,.12)'}}>
               {added[i]?'✓ Added to leads':'+ Add as lead'}
             </button>
           </div>
