@@ -1,6 +1,7 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
 import { useEffect, useState } from 'react';
 import { STAGES, SERVICES, SOURCES, urgency, TONE, money, repName } from '../lib/pipeline';
+import { newLeadDefaults } from '../lib/settings';
 
 // Escape every user-controlled value before it enters the deal-sheet HTML.
 // Leads are shared firm-wide and some fields come from imported spreadsheets,
@@ -55,7 +56,7 @@ export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, 
   const existing = leadId ? leads.find(l=>l.id===leadId) : null;
   const [sub,setSub]=useState(leadId?'info':'edit');
   const [form,setForm]=useState(empty);
-  useEffect(()=>{ setForm(existing?{...empty,...existing,action_date:existing.action_date||''}:empty); },[leadId]); // eslint-disable-line
+  useEffect(()=>{ setForm(existing?{...empty,...existing,action_date:existing.action_date||''}:{...empty,...newLeadDefaults()}); },[leadId]); // eslint-disable-line
 
   const set=(k)=>(e)=>setForm(f=>({...f,[k]:e.target.value}));
   const toggleService=(s)=>setForm(f=>({...f,services:f.services.includes(s)?f.services.filter(x=>x!==s):[...f.services,s]}));

@@ -1,8 +1,10 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
 import { STAGES, OPEN_STAGES, money, forecast } from '../../lib/pipeline';
+import { useSettings } from '../../lib/settings';
 
 export default function PipelineTab({ leads }){
-  const fc = forecast(leads);
+  const settings = useSettings();
+  const fc = forecast(leads, settings.stageProbability);
   const stages = STAGES.filter(s=>OPEN_STAGES.includes(s.id)).map(s=>{
     const items=leads.filter(l=>l.stage===s.id);
     return { ...s, count:items.length, value:items.reduce((a,l)=>a+ +l.value,0) };

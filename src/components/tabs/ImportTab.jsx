@@ -1,15 +1,15 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
 import { useState } from 'react';
+import { useSettings, newLeadDefaults } from '../../lib/settings';
 
 const enc = encodeURIComponent;
 const cleanPhone = (v) => ('' + v).replace(/[^\d+]/g, '');
 const isEmail = (v) => /.+@.+\..+/.test('' + v);
 
-const FROM = 'Dastero Tech';
 const firstName = (n) => { const w=(''+n).trim().split(/\s+/)[0]; return (!w||w.startsWith('('))?'':w; };
-const tplSms  = (n) => `Hi${firstName(n)?` ${firstName(n)}`:''}, this is ${FROM} — quick question about your IT when you have a minute.`;
-const tplSub  = (co) => `Quick question about ${co}'s IT`;
-const tplBody = (n) => `Hi${firstName(n)?` ${firstName(n)}`:''},\n\nI'm with ${FROM} — we handle IT support, security, and more for local businesses, and we actually answer the phone.\n\nWorth a quick chat to see if we're a fit?\n\nThanks`;
+const tplSms  = (n, co) => `Hi${firstName(n)?` ${firstName(n)}`:''}, this is ${co} — quick question about your IT when you have a minute.`;
+const tplSub  = (company) => `Quick question about ${company}'s IT`;
+const tplBody = (n, co, sender) => `Hi${firstName(n)?` ${firstName(n)}`:''},\n\nI'm with ${co} — we handle IT support, security, and more for local businesses, and we actually answer the phone.\n\nWorth a quick chat to see if we're a fit?\n\nThanks${sender?`,\n${sender}`:''}`;
 
 function detect(keys){
   const find=(re,not)=>keys.find(k=>re.test(k.toLowerCase()) && !(not&&not.test(k.toLowerCase())));
@@ -46,6 +46,9 @@ function Rule({children}){ return (
 ); }
 
 export default function ImportTab({ addLead }){
+  const settings=useSettings();
+  const company=settings.outreachCompany||'Dastero Tech';
+  const sender=settings.outreachSender||'';
   const [rows,setRows]=useState([]);
   const [cols,setCols]=useState({});
   const [added,setAdded]=useState({});
@@ -71,7 +74,7 @@ export default function ImportTab({ addLead }){
 
   const addAsLead=async(c,i)=>{
     const id=await addLead({ company:c.company||c.name, contact_name:c.company?c.name:'', contact_title:c.title||null,
-      phone:c.phoneRaw||null, email:isEmail(c.email)?c.email:null, source:'Imported', stage:'prospect' });
+      phone:c.phoneRaw||null, email:isEmail(c.email)?c.email:null, source:'Imported', ...newLeadDefaults() });
     if(id) setAdded(a=>({...a,[i]:true}));
   };
 
@@ -94,7 +97,7 @@ export default function ImportTab({ addLead }){
         <>
           <div className="dim text-[13px] font-bold mt-1">{rows.length} contact{rows.length!==1?'s':''}</div>
           {rows.map((r,i)=>{
-            const c=resolve(r,cols), sub=tplSub(c.company||c.name), body=tplBody(c.name);
+            const c=resolve(r,cols), sub=tplSub(c.company||c.name), body=tplBody(c.name,company,sender);
             return (
               <div key={i} className="surface rounded-xl p-3.5">
                 <div className="font-bold text-[15px]">{c.name}</div>
@@ -105,7 +108,7 @@ export default function ImportTab({ addLead }){
                       <a href={`tel:${c.phone}`} className="flex-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5 panel font-bold text-sm" style={{border:'1px solid rgba(27,158,110,.4)'}}>
                         <span style={{color:'#1B9E6E'}}>📞</span><span className="flex flex-col leading-tight min-w-0"><span className="dim text-[11px] uppercase tracking-wide">Call</span><span className="truncate">{c.phoneRaw}</span></span>
                       </a>
-                      <a href={`sms:${c.phone}&body=${enc(tplSms(c.name))}`} className="rounded-xl px-4 flex items-center font-bold text-[13px]" style={{border:'1px solid var(--line)',color:'#2F6BF0'}}>💬 Text</a>
+                      <a href={`sms:${c.phone}&body=${enc(tplSms(c.name,company))}`} className="rounded-xl px-4 flex items-center font-bold text-[13px]" style={{border:'1px solid var(--line)',color:'#2F6BF0'}}>💬 Text</a>
                     </div>
                   )}
                   {isEmail(c.email) && (

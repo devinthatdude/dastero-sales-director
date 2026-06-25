@@ -37,10 +37,11 @@ export const STAGE_PROBABILITY = {
   prospect:0.10, qualified:0.25, discovery_done:0.45, solution_presented:0.65, negotiating:0.80,
 };
 // Weighted forecast across open deals: weighted $, total open $, and overall likelihood %.
-export function forecast(leads){
+// `probs` lets the user's tuned odds (Settings) override the defaults.
+export function forecast(leads, probs=STAGE_PROBABILITY){
   const open = leads.filter(l=>OPEN_STAGES.includes(l.stage));
   const openVal = open.reduce((s,l)=>s+ +l.value,0);
-  const weighted = open.reduce((s,l)=>s + (+l.value)*(STAGE_PROBABILITY[l.stage]??0),0);
+  const weighted = open.reduce((s,l)=>s + (+l.value)*(probs[l.stage]??0),0);
   const pct = openVal>0 ? Math.round(weighted/openVal*100) : 0;
   return { open, count:open.length, openVal, weighted:Math.round(weighted), pct };
 }

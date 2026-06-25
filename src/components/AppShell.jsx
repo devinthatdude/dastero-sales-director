@@ -13,6 +13,8 @@ import ImportTab from './tabs/ImportTab';
 import LeadDetail from './LeadDetail';
 import ChangePassword from './ChangePassword';
 import NetworkField from './NetworkField';
+import SettingsModal from './SettingsModal';
+import { useSettings } from '../lib/settings';
 
 // Bottom-nav icons (stroke = currentColor) — mirror the design comp.
 const ICONS = {
@@ -47,21 +49,26 @@ export default function AppShell({ profile, isAdmin, onSignOut }){
   const data=useLeads();
   const tags=useTags();
   const profiles=useProfiles();
-  const [tab,setTab]=useState('today');
+  const settings=useSettings();
+  const [tab,setTab]=useState(settings.startTab);
   const [detail,setDetail]=useState(null);
   const [menuOpen,setMenuOpen]=useState(false);
   const [pwOpen,setPwOpen]=useState(false);
+  const [settingsOpen,setSettingsOpen]=useState(false);
 
   const shared={ ...data, tags, isAdmin, profile, profiles, onSignOut, onOpen:(id)=>setDetail(id) };
   const h = header(tab, data.leads);
-  const dsInitials = (repName(profile).match(/\b\w/g)||['D','S']).slice(0,2).join('').toUpperCase();
+  const avatarName = settings.displayName || repName(profile);
+  const dsInitials = (avatarName.match(/\b\w/g)||['D','S']).slice(0,2).join('').toUpperCase();
   const showFab = tab==='today' || tab==='leads';
 
   return (
     <div className="min-h-screen pb-24 max-w-[420px] mx-auto relative">
       {/* ---------- Header (constellation + eyebrow/title/sub + avatar) ---------- */}
-      <div className="relative overflow-hidden px-5 pt-8 pb-5">
-        {tab==='today' && <NetworkField/>}
+      <div className="relative px-5 pt-8 pb-5">
+        {tab==='today' && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none"><NetworkField/></div>
+        )}
         <div className="relative z-10 flex justify-between items-start gap-3">
           <div>
             <div className="text-[10.5px] tracking-[0.2em] uppercase font-bold" style={{color:'#2F6BF0'}}>{h.eyebrow}</div>
@@ -75,10 +82,9 @@ export default function AppShell({ profile, isAdmin, onSignOut }){
               {dsInitials}
             </button>
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-44 surface rounded-xl p-1 z-30 text-sm" onMouseLeave={()=>setMenuOpen(false)}>
+              <div className="absolute right-0 mt-2 w-44 surface rounded-xl p-1 z-50 text-sm" style={{boxShadow:'0 12px 28px -10px rgba(12,22,38,.45)'}} onMouseLeave={()=>setMenuOpen(false)}>
                 <div className="px-3 py-2 dim text-[11px] truncate">{profile?.email || repName(profile)}</div>
-                <button onClick={()=>{setPwOpen(true);setMenuOpen(false);}} className="w-full text-left px-3 py-2 rounded-lg hover:bg-[#F4F7FC] font-semibold">Change password</button>
-                <button onClick={onSignOut} className="w-full text-left px-3 py-2 rounded-lg hover:bg-[#F4F7FC] font-semibold" style={{color:'#DC4B43'}}>Sign out</button>
+                <button onClick={()=>{setSettingsOpen(true);setMenuOpen(false);}} className="w-full text-left px-3 py-2 rounded-lg hover:bg-[#F4F7FC] font-semibold">Settings</button>
               </div>
             )}
           </div>
@@ -128,6 +134,10 @@ export default function AppShell({ profile, isAdmin, onSignOut }){
         <LeadDetail leadId={detail==='new'?null:detail} {...data} tags={tags} profiles={profiles} isAdmin={isAdmin} onClose={()=>setDetail(null)} />
       )}
       {pwOpen && <ChangePassword onClose={()=>setPwOpen(false)} />}
+      {settingsOpen && (
+        <SettingsModal onClose={()=>setSettingsOpen(false)} profile={profile} isAdmin={isAdmin}
+          onSignOut={onSignOut} onChangePassword={()=>{setSettingsOpen(false);setPwOpen(true);}} />
+      )}
     </div>
   );
 }
