@@ -30,6 +30,32 @@ export function urgency(lead){
 }
 export const TONE = {fresh:'#14B5C0',warm:'#D98A2B',cold:'#DC4B43',won:'#1B9E6E',lost:'#92A0B8',none:'#92A0B8'};
 export const money = (n)=> '$'+(Number(n)||0).toLocaleString('en-US');
+
+// ASSUMPTION (tune to taste): probability a deal at each stage closes. Used only
+// to derive the "weighted forecast" the comp shows — your data has no win-prob field.
+export const STAGE_PROBABILITY = {
+  prospect:0.10, qualified:0.25, discovery_done:0.45, solution_presented:0.65, negotiating:0.80,
+};
+// Weighted forecast across open deals: weighted $, total open $, and overall likelihood %.
+export function forecast(leads){
+  const open = leads.filter(l=>OPEN_STAGES.includes(l.stage));
+  const openVal = open.reduce((s,l)=>s+ +l.value,0);
+  const weighted = open.reduce((s,l)=>s + (+l.value)*(STAGE_PROBABILITY[l.stage]??0),0);
+  const pct = openVal>0 ? Math.round(weighted/openVal*100) : 0;
+  return { open, count:open.length, openVal, weighted:Math.round(weighted), pct };
+}
+
+// Avatar helpers for lead rows — stable color per company, 2-letter initials.
+export const AVATAR_PALETTE = ['#2F6BF0','#0B8C95','#6E5BD6','#1B9E6E','#C77A1A','#3F5FA6','#B0476B'];
+export function initials(name){
+  const w=(name||'').trim().split(/\s+/).filter(Boolean);
+  if(!w.length) return '—';
+  return ((w[0][0]||'')+(w[1]?.[0]||'')).toUpperCase();
+}
+export function avatarColor(seed){
+  const s=(seed||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  return AVATAR_PALETTE[s%AVATAR_PALETTE.length];
+}
 // Display name for a profile/rep, resilient to a missing full_name or email.
 export function repName(p){
   if(!p) return '—';

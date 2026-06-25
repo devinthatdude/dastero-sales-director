@@ -1,54 +1,31 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
-import { useRef } from 'react';
-import { urgency, TONE, money } from '../lib/pipeline';
+import { urgency, TONE, money, STAGES } from '../lib/pipeline';
 
-export default function LeadCard({ lead, tags, draggable=false, onOpen, onLongPress }){
-  const u=urgency(lead);
-  const c=TONE[u.tone];
-  const leadTags=(lead.tagIds||[]).map(id=>tags.find(t=>t.id===id)).filter(Boolean);
-  const timer = useRef(null);
+const stageName = (id) => STAGES.find((s) => s.id === id)?.name || id;
 
-  const onTouchStart = onLongPress ? () => {
-    timer.current = setTimeout(() => onLongPress(), 500);
-  } : undefined;
-
-  const cancelLong = onLongPress ? () => clearTimeout(timer.current) : undefined;
+// Detailed lead card (Today / overdue). Left accent bar + stage & service pills + age.
+export default function LeadCard({ lead, onOpen }){
+  const u = urgency(lead);
+  const c = TONE[u.tone];
+  const service = (lead.services || [])[0];
 
   return (
-    <div
-      draggable={draggable}
-      onDragStart={draggable ? (e)=>e.dataTransfer.setData('text/plain',lead.id) : undefined}
-      onClick={()=>onOpen(lead.id)}
-      onTouchStart={onTouchStart}
-      onTouchEnd={cancelLong}
-      onTouchMove={cancelLong}
-      className="surface rounded-xl p-3 mb-2 shadow-sm cursor-pointer transition"
-      style={{borderLeftColor:c,borderLeftWidth:'3px'}}
-    >
-      <div className="flex justify-between items-baseline gap-2">
-        <span className="font-semibold text-sm leading-tight">{lead.company}</span>
-        <span className="font-semibold text-sm whitespace-nowrap mono" style={{color:'#0C1626'}}>{money(lead.value)}</span>
-      </div>
-      {lead.contact_name && (
-        <div className="text-xs soft mt-0.5">{lead.contact_name}{lead.contact_title?` · ${lead.contact_title}`:''}</div>
-      )}
-      {(lead.services||[]).length>0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {lead.services.map(s=>(
-            <span key={s} className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-              style={{background:'rgba(27,158,110,.12)',color:'#1B9E6E'}}>{s}</span>
-          ))}
+    <div onClick={()=>onOpen(lead.id)}
+      className="surface rounded-xl px-3.5 py-3 mb-3 cursor-pointer relative overflow-hidden flex flex-col gap-2.5">
+      <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded" style={{background:c}}/>
+      <div className="flex justify-between items-start gap-2.5 pl-1.5">
+        <div className="min-w-0">
+          <div className="font-bold text-[15px] leading-tight truncate" style={{letterSpacing:'-0.01em'}}>{lead.company}</div>
+          {lead.contact_name && (
+            <div className="text-xs soft mt-0.5 truncate">{lead.contact_name}{lead.contact_title?` · ${lead.contact_title}`:''}</div>
+          )}
         </div>
-      )}
-      <div className="flex items-center justify-between mt-2.5 gap-2">
-        <span className="text-[11px] font-semibold" style={{color:c}}>{u.label}</span>
-        {leadTags.length>0 && (
-          <span className="flex gap-1">
-            {leadTags.slice(0,5).map(t=>(
-              <span key={t.id} title={t.label} className="w-2 h-2 rounded-full" style={{background:t.color}} />
-            ))}
-          </span>
-        )}
+        <div className="mono font-bold text-[14.5px] whitespace-nowrap">{money(lead.value)}</div>
+      </div>
+      <div className="flex items-center gap-2 flex-wrap pl-1.5">
+        <span className="text-[10.5px] font-bold px-2.5 py-[3px] rounded-full" style={{background:'rgba(47,107,240,.09)',color:'#2F6BF0'}}>{stageName(lead.stage)}</span>
+        {service && <span className="text-[10.5px] font-bold px-2.5 py-[3px] rounded-full" style={{background:'rgba(20,181,192,.12)',color:'#0B8C95'}}>{service}</span>}
+        <span className="ml-auto text-[11px] font-bold" style={{color:c}}>{u.label}</span>
       </div>
     </div>
   );
