@@ -33,7 +33,7 @@ export default function AppShell({ profile, isAdmin, onSignOut }){
     <div className="min-h-screen pb-20 max-w-2xl mx-auto">
       {data.error && (
         <div className="mx-4 mt-3 text-sm rounded-lg px-3 py-2 flex justify-between"
-          style={{background:'rgba(240,88,78,.12)',color:'#F0584E',border:'1px solid rgba(240,88,78,.3)'}}>
+          style={{background:'rgba(220,75,67,.1)',color:'#DC4B43',border:'1px solid rgba(220,75,67,.3)'}}>
           <span>{data.error}</span><button onClick={data.clearError} className="font-semibold">Dismiss</button>
         </div>
       )}
@@ -52,7 +52,7 @@ export default function AppShell({ profile, isAdmin, onSignOut }){
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} className="flex flex-col items-center gap-0.5 px-2">
             <span className="text-lg" style={{filter: tab===t.id?'none':'grayscale(1)',opacity: tab===t.id?1:.55}}>{t.icon}</span>
-            <span className="text-[10px] font-semibold tracking-wide" style={{color: tab===t.id?'#2FB6C8':'#626E8B'}}>{t.id.toUpperCase()}</span>
+            <span className="text-[10px] font-semibold tracking-wide" style={{color: tab===t.id?'#2F6BF0':'#92A0B8'}}>{t.id.toUpperCase()}</span>
           </button>
         ))}
       </nav>
