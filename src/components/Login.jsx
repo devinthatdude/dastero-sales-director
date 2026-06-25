@@ -56,7 +56,7 @@ export default function Login() {
               type="email"
               autoComplete="email"
               placeholder="you@dasterotech.com"
-              className="w-full text-sm px-3 py-2.5 border border-slate-200 rounded-lg mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+              className="w-full text-sm px-3 py-2.5 border border-slate-200 rounded-lg mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             />
             <input
               value={password}
@@ -65,7 +65,7 @@ export default function Login() {
               type="password"
               autoComplete="current-password"
               placeholder="Password"
-              className="w-full text-sm px-3 py-2.5 border border-slate-200 rounded-lg mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+              className="w-full text-sm px-3 py-2.5 border border-slate-200 rounded-lg mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             />
             <button
               onClick={signIn}

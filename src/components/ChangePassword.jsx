@@ -26,10 +26,10 @@ export default function ChangePassword({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
-      style={{ background: 'rgba(8,12,24,.6)' }} onClick={onClose}>
+      style={{ background: 'rgba(8,12,24,.5)' }} onClick={onClose}>
       <div className="panel rounded-2xl p-5 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-lg font-bold text-white">Change password</h2>
+          <h2 className="text-lg font-bold">Change password</h2>
           <button onClick={onClose} className="dim text-sm font-semibold">Close</button>
         </div>
         {done ? (
@@ -45,7 +45,7 @@ export default function ChangePassword({ onClose }) {
               className="w-full brandbtn rounded-xl py-2.5 text-sm font-semibold disabled:opacity-60">
               {busy ? 'Saving…' : 'Update password'}
             </button>
-            {error && <p className="text-xs mt-2" style={{ color: '#F0584E' }}>{error}</p>}
+            {error && <p className="text-xs mt-2" style={{ color: '#DC4B43' }}>{error}</p>}
           </>
         )}
       </div>

@@ -54,6 +54,10 @@ small patches (0.1.0 → 0.1.1), the **middle** for new features (0.1.0 → 0.2.
   owner (admins keep delete-any), enforced by RLS
   (`sql/2026-06-23_leads_delete_own.sql`).
 ### Changed
+- **Light "connected" redesign.** App moved from the dark dashboard to a light,
+  brand-aligned theme (tokens centralized in `index.css`), monospace figures, a
+  node-link constellation in the Today header (`NetworkField`), and a unified
+  palette across every screen. The PDF deal sheet's own colors are unchanged.
 - Removed unused `owners` lookup + its profiles query; lighter load.
 - **Profiles are readable by all signed-in users** (was self-or-admin) so the
   owner filter can show teammate names (`sql/2026-06-23_profiles_read_all.sql`).

@@ -1,6 +1,7 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
 import { useEffect, useState } from 'react';
 import { STAGES, SERVICES, SOURCES, urgency, TONE, money, repName } from '../lib/pipeline';
+import { newLeadDefaults } from '../lib/settings';
 
 // Escape every user-controlled value before it enters the deal-sheet HTML.
 // Leads are shared firm-wide and some fields come from imported spreadsheets,
@@ -55,7 +56,7 @@ export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, 
   const existing = leadId ? leads.find(l=>l.id===leadId) : null;
   const [sub,setSub]=useState(leadId?'info':'edit');
   const [form,setForm]=useState(empty);
-  useEffect(()=>{ setForm(existing?{...empty,...existing,action_date:existing.action_date||''}:empty); },[leadId]); // eslint-disable-line
+  useEffect(()=>{ setForm(existing?{...empty,...existing,action_date:existing.action_date||''}:{...empty,...newLeadDefaults()}); },[leadId]); // eslint-disable-line
 
   const set=(k)=>(e)=>setForm(f=>({...f,[k]:e.target.value}));
   const toggleService=(s)=>setForm(f=>({...f,services:f.services.includes(s)?f.services.filter(x=>x!==s):[...f.services,s]}));
@@ -79,20 +80,20 @@ export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      style={{background:'rgba(4,7,15,.66)'}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+      style={{background:'rgba(4,7,15,.5)'}} onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="panel w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-auto">
         <div className="flex items-start justify-between p-5 pb-3">
           <div>
-            <h2 className="text-xl font-bold text-white leading-tight">{form.company||'New lead'}</h2>
+            <h2 className="text-xl font-bold leading-tight">{form.company||'New lead'}</h2>
             {existing && <div className="soft text-sm">{existing.contact_name||'—'}{existing.contact_title?` · ${existing.contact_title}`:''}</div>}
           </div>
           <button onClick={onClose} className="dim text-xl px-2">✕</button>
         </div>
 
-        <div className="flex gap-4 px-5 border-b text-sm font-semibold" style={{borderColor:'#26314B'}}>
+        <div className="flex gap-4 px-5 border-b text-sm font-semibold" style={{borderColor:'#DCE4F1'}}>
           {SUBS.map(s=>(
             <button key={s} onClick={()=>setSub(s)} className="pb-2 capitalize"
-              style={{color:sub===s?'#2FB6C8':'#626E8B',borderBottom:sub===s?'2px solid #2FB6C8':'2px solid transparent'}}>{s}</button>
+              style={{color:sub===s?'#2F6BF0':'#92A0B8',borderBottom:sub===s?'2px solid #2F6BF0':'2px solid transparent'}}>{s}</button>
           ))}
         </div>
 
@@ -101,7 +102,7 @@ export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, 
           {sub==='edit'   && <Edit form={form} set={set} toggleService={toggleService} save={save} isNew={!existing} />}
           {sub==='tags'   && existing && <Tags tags={tags} active={existing.tagIds||[]} toggle={toggleTag} />}
           {sub==='cadence'&& existing && (
-            <div className="soft text-sm">Next: <span className="text-white">{existing.next_action||'—'}</span>{existing.action_date?` · ${existing.action_date}`:''}
+            <div className="soft text-sm">Next: <span style={{color:'#0C1626'}}>{existing.next_action||'—'}</span>{existing.action_date?` · ${existing.action_date}`:''}
               <div className="dim mt-3">Full follow-up sequences arrive in a later update.</div></div>
           )}
           {sub==='notes'  && existing && <Notes lead={existing} updateLead={updateLead} />}
@@ -111,7 +112,7 @@ export default function LeadDetail({ leadId, leads, tags, profiles=[], isAdmin, 
   );
 }
 
-function Row({k,v}){ return <div><div className="dim text-[11px] uppercase tracking-wide font-semibold">{k}</div><div className="text-white text-sm mt-0.5">{v||'—'}</div></div>; }
+function Row({k,v}){ return <div><div className="dim text-[11px] uppercase tracking-wide font-semibold">{k}</div><div className="text-sm mt-0.5">{v||'—'}</div></div>; }
 
 function Info({lead,tags,profiles,u,setStage,canDelete,onDelete,onPrint}){
   const leadTags=(lead.tagIds||[]).map(id=>tags.find(t=>t.id===id)).filter(Boolean);
@@ -121,7 +122,7 @@ function Info({lead,tags,profiles,u,setStage,canDelete,onDelete,onPrint}){
       <div className="flex flex-wrap gap-2">
         {STAGES.map(s=>(
           <button key={s.id} onClick={()=>setStage(s.id)} className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-            style={{border:`1px solid ${lead.stage===s.id?s.color:'#26314B'}`,color:lead.stage===s.id?'#fff':'#9AA6C0',
+            style={{border:`1px solid ${lead.stage===s.id?s.color:'#DCE4F1'}`,color:lead.stage===s.id?s.color:'#5C6B85',
               background:lead.stage===s.id?s.color+'22':'transparent'}}>{s.name}</button>
         ))}
       </div>
@@ -133,7 +134,7 @@ function Info({lead,tags,profiles,u,setStage,canDelete,onDelete,onPrint}){
       </div>
       {(lead.services||[]).length>0 && (
         <div className="flex flex-wrap gap-1.5">
-          {lead.services.map(s=> <span key={s} className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{background:'rgba(53,194,138,.14)',color:'#35C28A'}}>{s}</span>)}
+          {lead.services.map(s=> <span key={s} className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{background:'rgba(27,158,110,.12)',color:'#1B9E6E'}}>{s}</span>)}
         </div>
       )}
       {leadTags.length>0 && (
@@ -145,12 +146,12 @@ function Info({lead,tags,profiles,u,setStage,canDelete,onDelete,onPrint}){
         <div className="text-sm font-semibold rounded-lg px-3 py-2" style={{background:TONE[u.tone]+'1A',color:TONE[u.tone]}}>{u.label} — {lead.next_action||'follow up'}</div>
       )}
       <div className="grid grid-cols-2 gap-2.5">
-        {lead.phone && <a href={`tel:${lead.phone}`} className="surface rounded-xl py-3 text-center text-sm font-semibold text-white">📞 Call</a>}
-        {lead.email && <a href={`mailto:${lead.email}`} className="surface rounded-xl py-3 text-center text-sm font-semibold text-white">✉️ Email</a>}
+        {lead.phone && <a href={`tel:${lead.phone}`} className="surface rounded-xl py-3 text-center text-sm font-semibold">📞 Call</a>}
+        {lead.email && <a href={`mailto:${lead.email}`} className="surface rounded-xl py-3 text-center text-sm font-semibold">✉️ Email</a>}
       </div>
-      {owner && <div className="text-xs dim">Owner: <span className="text-white font-semibold">{repName(owner)}</span></div>}
-      <button onClick={onPrint} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#2FB6C8',background:'rgba(47,182,200,.08)',border:'1px solid rgba(47,182,200,.2)'}}>🖨 Print deal sheet</button>
-      {canDelete && <button onClick={onDelete} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#F0584E',background:'rgba(240,88,78,.1)'}}>Delete lead</button>}
+      {owner && <div className="text-xs dim">Owner: <span className="font-semibold" style={{color:'#0C1626'}}>{repName(owner)}</span></div>}
+      <button onClick={onPrint} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#2F6BF0',background:'rgba(47,107,240,.08)',border:'1px solid rgba(47,107,240,.2)'}}>🖨 Print deal sheet</button>
+      {canDelete && <button onClick={onDelete} className="w-full text-sm font-semibold py-2.5 rounded-xl" style={{color:'#DC4B43',background:'rgba(220,75,67,.1)'}}>Delete lead</button>}
     </div>
   );
 }
@@ -174,8 +175,8 @@ function Edit({form,set,toggleService,save,isNew}){
         <div className="flex flex-wrap gap-1.5">
           {SERVICES.map(s=>(
             <button key={s} onClick={()=>toggleService(s)} className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-              style={{border:`1px solid ${form.services.includes(s)?'#35C28A':'#26314B'}`,color:form.services.includes(s)?'#35C28A':'#9AA6C0',
-                background:form.services.includes(s)?'rgba(53,194,138,.12)':'transparent'}}>{s}</button>
+              style={{border:`1px solid ${form.services.includes(s)?'#1B9E6E':'#DCE4F1'}`,color:form.services.includes(s)?'#1B9E6E':'#5C6B85',
+                background:form.services.includes(s)?'rgba(27,158,110,.12)':'transparent'}}>{s}</button>
           ))}
         </div>
       </Field>
@@ -190,7 +191,7 @@ function Tags({tags,active,toggle}){
     <div className="flex flex-wrap gap-2">
       {tags.map(t=>{ const on=active.includes(t.id);
         return <button key={t.id} onClick={()=>toggle(t.id)} className="text-xs font-semibold px-3 py-1.5 rounded-full"
-          style={{border:`1px solid ${on?t.color:'#26314B'}`,color:on?'#fff':'#9AA6C0',background:on?t.color+'22':'transparent'}}>{t.emoji} {t.label}</button>;
+          style={{border:`1px solid ${on?t.color:'#DCE4F1'}`,color:on?t.color:'#5C6B85',background:on?t.color+'22':'transparent'}}>{t.emoji} {t.label}</button>;
       })}
     </div>
   );
