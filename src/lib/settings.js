@@ -9,7 +9,8 @@ import { STAGE_PROBABILITY } from './pipeline';
 const KEY = 'dastero_settings';
 
 export const SETTINGS_DEFAULTS = {
-  todayPanel: 'maps',                       // 'maps' | 'claude' | 'hidden'
+  todayPanel: 'hidden',                     // 'maps' | 'claude' | 'hidden' — hidden by default so a keyless prod looks clean
+
   startTab: 'today',                        // which tab the app opens on
   defaultStage: 'prospect',                 // stage applied to new leads
   followUpDays: 7,                          // new leads get a next-action date this many days out (0 = none)
