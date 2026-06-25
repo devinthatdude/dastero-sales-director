@@ -1,0 +1,281 @@
+<title>Dastero Sales Director — proposed look</title>
+<style>
+  :root{
+    --ground:#EEF2F9;        /* cool light mist — page + app field */
+    --field:#F4F7FC;         /* app screen field */
+    --surface:#FFFFFF;       /* cards */
+    --text:#0C1626;          /* deep ink navy */
+    --muted:#5C6B85;         /* secondary text */
+    --faint:#92A0B8;         /* tertiary / eyebrows */
+    --hair:#DCE4F1;          /* hairlines */
+    --accent:#2F6BF0;        /* Dastero signal blue */
+    --accent2:#14B5C0;       /* cyan, sparing */
+    --won:#1B9E6E;
+    --due:#D98A2B;
+    --over:#DC4B43;
+    --r:14px;
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(120% 80% at 80% -10%, #E5ECF8 0%, var(--ground) 55%);
+    color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    padding:44px 18px 64px;
+    gap:30px;
+  }
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-feature-settings:"tnum" 1}
+
+  /* ---- intro line ---- */
+  .intro{max-width:392px;width:100%}
+  .intro .kick{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .intro h1{font-size:23px;font-weight:800;letter-spacing:-.018em;margin-top:7px;line-height:1.15}
+  .intro p{color:var(--muted);font-size:13.5px;margin-top:8px;line-height:1.5;max-width:34ch}
+
+  /* ---- phone ---- */
+  .phone{
+    width:392px; max-width:100%;
+    background:var(--field);
+    border:1px solid var(--hair);
+    border-radius:30px;
+    box-shadow:0 1px 0 #fff inset, 0 30px 60px -28px rgba(12,22,38,.45), 0 8px 22px -16px rgba(12,22,38,.3);
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* ---- header w/ constellation ---- */
+  header{position:relative;padding:30px 22px 22px;overflow:hidden}
+  header canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  header .hwrap{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start}
+  .eyebrow{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  header h2{font-size:27px;font-weight:800;letter-spacing:-.02em;margin-top:5px}
+  header .sub{color:var(--muted);font-size:13px;margin-top:6px}
+  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(150deg,var(--accent),#1E4FC8);
+    color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 12px -4px rgba(47,107,240,.7)}
+
+  .screen{padding:4px 16px 18px;display:flex;flex-direction:column;gap:12px}
+
+  /* ---- pipeline hero ---- */
+  .hero{
+    background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);
+    padding:18px 18px 16px;position:relative;overflow:hidden;
+    box-shadow:0 10px 24px -20px rgba(12,22,38,.5);
+  }
+  .hero .row{display:flex;justify-content:space-between;align-items:flex-start}
+  .hero .label{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .hero .val{font-size:38px;font-weight:680;letter-spacing:-.02em;margin-top:8px;line-height:1}
+  .hero .val .cur{color:var(--accent)}
+  .hero .meta{color:var(--muted);font-size:12.5px;margin-top:9px;display:flex;align-items:center;gap:7px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--won);box-shadow:0 0 0 3px rgba(27,158,110,.16)}
+  .spark{display:flex;gap:3px;align-items:flex-end;height:34px}
+  .spark span{width:5px;background:linear-gradient(var(--accent),#7AA0F4);border-radius:2px;opacity:.9}
+
+  /* ---- stat tiles ---- */
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .tile{background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:13px 12px}
+  .tile .n{font-size:25px;font-weight:720;letter-spacing:-.02em}
+  .tile .t{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-top:3px}
+  .tile.over .n{color:var(--over)} .tile.due .n{color:var(--due)} .tile.up .n{color:var(--won)}
+
+  /* ---- section ---- */
+  .sechead{display:flex;align-items:center;gap:10px;margin:8px 2px 0}
+  .sechead h3{font-size:15px;font-weight:800;letter-spacing:-.01em}
+  .sechead .ct{font-size:11px;font-weight:700;color:var(--over);background:rgba(220,75,67,.1);
+    padding:2px 7px;border-radius:20px}
+  .sechead .rule{flex:1;height:1px;background:var(--hair)}
+
+  /* ---- lead card ---- */
+  .lead{background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:13px 14px;
+    display:flex;flex-direction:column;gap:9px;position:relative}
+  .lead::before{content:"";position:absolute;left:0;top:13px;bottom:13px;width:3px;border-radius:3px;background:var(--over)}
+  .lead.warm::before{background:var(--due)}
+  .lead .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .lead .co{font-size:15px;font-weight:700;letter-spacing:-.01em}
+  .lead .who{font-size:12px;color:var(--muted);margin-top:1px}
+  .lead .v{font-size:14.5px;font-weight:700}
+  .lead .foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .chip{font-size:10.5px;font-weight:700;letter-spacing:.02em;padding:3px 9px;border-radius:20px;
+    background:rgba(47,107,240,.09);color:var(--accent)}
+  .chip.svc{background:rgba(20,181,192,.12);color:#0B8C95}
+  .age{margin-left:auto;font-size:11px;font-weight:700;color:var(--over)}
+  .age.warm{color:var(--due)}
+
+  /* ---- bottom nav ---- */
+  nav{display:flex;justify-content:space-around;align-items:center;
+    background:rgba(255,255,255,.9);backdrop-filter:blur(8px);
+    border-top:1px solid var(--hair);padding:9px 4px 12px}
+  nav .item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--faint);flex:1}
+  nav .item .ic{width:21px;height:21px;display:block}
+  nav .item span{font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  nav .item.on{color:var(--accent)}
+  nav .item.on .tab-label{color:var(--accent)}
+
+  .fab{position:absolute;right:18px;bottom:74px;width:52px;height:52px;border-radius:50%;
+    background:linear-gradient(150deg,var(--accent),#1E4FC8);color:#fff;border:none;
+    font-size:27px;line-height:1;cursor:pointer;
+    box-shadow:0 12px 22px -8px rgba(47,107,240,.75);display:flex;align-items:center;justify-content:center}
+  .fab:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+
+  /* ---- system strip ---- */
+  .system{max-width:392px;width:100%;display:flex;flex-direction:column;gap:12px}
+  .sysrow{display:flex;gap:8px;flex-wrap:wrap}
+  .sw{flex:1;min-width:64px;border-radius:10px;border:1px solid var(--hair);overflow:hidden;background:#fff}
+  .sw .cap{height:46px}
+  .sw .lab{font-size:9.5px;font-weight:700;padding:5px 7px;display:flex;justify-content:space-between;color:var(--muted)}
+  .sw .lab b{color:var(--text);font-weight:700}
+  .sysnote{font-size:11.5px;color:var(--muted);line-height:1.5}
+  .sysnote b{color:var(--text)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="intro">
+  <div class="kick">Proposed direction · Today screen</div>
+  <h1>A lighter, “connected” Dastero.</h1>
+  <p>The brand’s network motif becomes the interface’s signature — quiet behind the header, precise everywhere else. Pipeline figures set in monospace so the numbers read as engineered, not decorative.</p>
+</div>
+
+<div class="phone">
+  <header>
+    <canvas id="net"></canvas>
+    <div class="hwrap">
+      <div>
+        <div class="eyebrow">Tuesday · June 23</div>
+        <h2>Good afternoon.</h2>
+        <div class="sub">Three deals need a touch before end of day.</div>
+      </div>
+      <div class="avatar" aria-hidden="true">DS</div>
+    </div>
+  </header>
+
+  <div class="screen">
+    <div class="hero">
+      <div class="row">
+        <div>
+          <div class="label">Active pipeline</div>
+          <div class="val mono"><span class="cur">$</span>248,500</div>
+          <div class="meta"><span class="dot"></span> 9 deals in motion · 2 closing this week</div>
+        </div>
+        <div class="spark" aria-hidden="true">
+          <span style="height:40%"></span><span style="height:62%"></span><span style="height:48%"></span>
+          <span style="height:78%"></span><span style="height:66%"></span><span style="height:100%"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tiles">
+      <div class="tile over"><div class="n mono">3</div><div class="t">Overdue</div></div>
+      <div class="tile due"><div class="n mono">5</div><div class="t">Today</div></div>
+      <div class="tile up"><div class="n mono">7</div><div class="t">Upcoming</div></div>
+    </div>
+
+    <div class="sechead">
+      <h3>Overdue</h3><span class="ct">3</span><span class="rule"></span>
+    </div>
+
+    <div class="lead">
+      <div class="top">
+        <div><div class="co">Northwind Dental Group</div><div class="who">Dr. Lena Ortiz · Office Manager</div></div>
+        <div class="v mono">$42,000</div>
+      </div>
+      <div class="foot">
+        <span class="chip">Negotiating</span><span class="chip svc">Managed IT</span>
+        <span class="age">4d overdue</span>
+      </div>
+    </div>
+
+    <div class="lead">
+      <div class="top">
+        <div><div class="co">Harbor Logistics Co.</div><div class="who">Marcus Reede · IT Director</div></div>
+        <div class="v mono">$88,000</div>
+      </div>
+      <div class="foot">
+        <span class="chip">Solution Presented</span><span class="chip svc">Network &amp; Security</span>
+        <span class="age">2d overdue</span>
+      </div>
+    </div>
+
+    <div class="lead warm">
+      <div class="top">
+        <div><div class="co">Cedar Park Clinic</div><div class="who">Priya Nair · Operations</div></div>
+        <div class="v mono">$31,500</div>
+      </div>
+      <div class="foot">
+        <span class="chip">Discovery Done</span><span class="chip svc">Surveillance</span>
+        <span class="age warm">due today</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" aria-label="Add lead">+</button>
+
+  <nav>
+    <div class="item on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg><span class="tab-label">Today</span></div>
+    <div class="item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><span>Pipeline</span></div>
+    <div class="item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg><span>Coach</span></div>
+    <div class="item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 5.5a3 3 0 0 1 0 5.7M21 20c0-2.5-1.3-4.7-3.3-5.6"/></svg><span>Leads</span></div>
+    <div class="item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V6M12 20v-9M20 20V9M3 20h18"/></svg><span>Stats</span></div>
+    <div class="item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span>Import</span></div>
+  </nav>
+</div>
+
+<div class="system">
+  <div class="sysrow">
+    <div class="sw"><div class="cap" style="background:#EEF2F9"></div><div class="lab"><b>Ground</b><span>EEF2F9</span></div></div>
+    <div class="sw"><div class="cap" style="background:#0C1626"></div><div class="lab"><b>Ink</b><span>0C1626</span></div></div>
+    <div class="sw"><div class="cap" style="background:#2F6BF0"></div><div class="lab"><b>Signal</b><span>2F6BF0</span></div></div>
+    <div class="sw"><div class="cap" style="background:#14B5C0"></div><div class="lab"><b>Cyan</b><span>14B5C0</span></div></div>
+    <div class="sw"><div class="cap" style="background:linear-gradient(90deg,#1B9E6E 33%,#D98A2B 33% 66%,#DC4B43 66%)"></div><div class="lab"><b>Status</b><span>3</span></div></div>
+  </div>
+  <div class="sysnote"><b>Type:</b> heavy tracked display for headings · <b>monospace</b> for every figure (pipeline, deal value, counts) · clean sans body. <b>Signature:</b> the node-link constellation behind the header — the brand’s “connection” made literal, kept to ~12% opacity so it reads as atmosphere, never noise.</div>
+</div>
+
+<script>
+  (function(){
+    const c = document.getElementById('net');
+    const ctx = c.getContext('2d');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let w, h, nodes, raf;
+    function seed(){
+      const r = c.getBoundingClientRect();
+      const dpr = Math.min(devicePixelRatio||1, 2);
+      w = r.width; h = r.height;
+      c.width = w*dpr; c.height = h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+      nodes = Array.from({length:16}, (_,i)=>({
+        x: ((i*97)%100)/100*w,
+        y: ((i*53)%100)/100*h,
+        vx: (((i*7)%5)-2)*0.05,
+        vy: (((i*11)%5)-2)*0.05
+      }));
+    }
+    function frame(){
+      ctx.clearRect(0,0,w,h);
+      for(const n of nodes){
+        if(!reduce){ n.x+=n.vx; n.y+=n.vy;
+          if(n.x<0||n.x>w) n.vx*=-1; if(n.y<0||n.y>h) n.vy*=-1; }
+      }
+      for(let i=0;i<nodes.length;i++){
+        for(let j=i+1;j<nodes.length;j++){
+          const a=nodes[i], b=nodes[j];
+          const d=Math.hypot(a.x-b.x,a.y-b.y);
+          if(d<88){
+            ctx.strokeStyle='rgba(47,107,240,'+(0.13*(1-d/88))+')';
+            ctx.lineWidth=1;
+            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+          }
+        }
+      }
+      for(const n of nodes){
+        ctx.fillStyle='rgba(47,107,240,0.22)';
+        ctx.beginPath(); ctx.arc(n.x,n.y,1.7,0,Math.PI*2); ctx.fill();
+      }
+      if(!reduce) raf=requestAnimationFrame(frame);
+    }
+    seed(); frame();
+    addEventListener('resize', ()=>{ cancelAnimationFrame(raf); seed(); frame(); });
+  })();
+</script>
