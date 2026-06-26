@@ -95,7 +95,7 @@ export default function MapsPanel({ addLead }){
         <div className="text-[14.5px] font-bold">{error==='no-key'?'Map needs a Google key':'Map failed to load'}</div>
         <div className="text-[12px] soft leading-snug" style={{maxWidth:'34ch'}}>
           {error==='no-key'
-            ? 'Add VITE_GOOGLE_MAPS_API_KEY (Maps JavaScript + Places enabled, referrer-restricted) to .env, then reload.'
+            ? 'Add your Google Maps key in Settings → Google Maps (Maps JavaScript + Places enabled, referrer-restricted), then reload. Admins can also set a company-wide VITE_GOOGLE_MAPS_API_KEY.'
             : 'Check the key restrictions and that billing is enabled in Google Cloud.'}
         </div>
       </div>
