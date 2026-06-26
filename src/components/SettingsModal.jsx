@@ -1,5 +1,6 @@
 // © 2026 Dastero Tech LLC — All rights reserved. See LICENSE.
 // Device-local settings (see src/lib/settings.js). Changes apply app-wide live.
+import { useState } from 'react';
 import { STAGES, OPEN_STAGES, repName } from '../lib/pipeline';
 import { useSettings, setSettings, resetSettings } from '../lib/settings';
 import TagManager from './TagManager';
@@ -33,6 +34,9 @@ function Lbl({children}){ return <div className="dim text-[11px] uppercase track
 
 export default function SettingsModal({ onClose, profile, isAdmin, onSignOut, onChangePassword, tags = [], leads = [] }){
   const s = useSettings();
+  const [showKey, setShowKey] = useState(false);
+  const [keyAtOpen] = useState(() => s.googleMapsKey || '');
+  const keyChanged = (s.googleMapsKey || '') !== keyAtOpen;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{background:'rgba(4,7,15,.5)'}}
@@ -48,6 +52,27 @@ export default function SettingsModal({ onClose, profile, isAdmin, onSignOut, on
           <Section title="Today panel" desc="What shows at the top of the Today tab.">
             <Seg value={s.todayPanel} onChange={v=>setSettings({todayPanel:v})}
               options={[{v:'maps',l:'Google Maps'},{v:'claude',l:'Ask Claude'},{v:'hidden',l:'Hidden'}]} />
+          </Section>
+
+          {/* Google Maps key */}
+          <Section title="Google Maps" desc="Your own Google Maps key for the prospecting map. Leave blank to use the company key.">
+            <label className="block">
+              <Lbl>Your Maps API key</Lbl>
+              <div className="flex gap-2">
+                <input type={showKey ? 'text' : 'password'} className="input flex-1 mono text-[12px]"
+                  value={s.googleMapsKey} placeholder="AIza… (Maps JavaScript + Places, referrer-restricted)"
+                  onChange={e=>setSettings({googleMapsKey:e.target.value})} />
+                <button type="button" onClick={()=>setShowKey(v=>!v)}
+                  className="font-bold text-[12px] px-3 rounded-lg panel flex-none">{showKey?'Hide':'Show'}</button>
+              </div>
+            </label>
+            {keyChanged && (
+              <div className="mt-2 flex items-center gap-2 text-[11.5px]">
+                <span className="soft">Reload for the new key to take effect.</span>
+                <button onClick={()=>window.location.reload()} className="font-bold px-2.5 py-1 rounded-lg"
+                  style={{background:'rgba(47,107,240,.12)',color:'#2F6BF0'}}>Reload now</button>
+              </div>
+            )}
           </Section>
 
           {/* Forecast odds */}
