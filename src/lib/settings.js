@@ -18,6 +18,7 @@ export const SETTINGS_DEFAULTS = {
   outreachCompany: 'Dastero Tech',          // sender company in Import templates
   outreachSender: '',                       // optional sender name appended to outreach
   displayName: '',                          // optional local override for the greeting/avatar
+  googleMapsKey: '',                        // optional per-user Google Maps browser key (device-local)
 };
 
 let cache = null;
