@@ -21,7 +21,7 @@ export default function TodayTab({ leads, addLead, onOpen }){
       {panel==='maps' && (
         <>
           <div className="text-[10.5px] tracking-[0.18em] uppercase font-bold px-0.5" style={{color:'#2F6BF0'}}>Find leads nearby</div>
-          <MapsPanel addLead={addLead} />
+          <MapsPanel addLead={addLead} leads={leads} />
         </>
       )}
       {panel==='claude' && <AskClaudePanel leads={leads} />}
