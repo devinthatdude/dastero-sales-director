@@ -136,6 +136,7 @@ export default function AppShell({ profile, isAdmin, onSignOut }){
       {pwOpen && <ChangePassword onClose={()=>setPwOpen(false)} />}
       {settingsOpen && (
         <SettingsModal onClose={()=>setSettingsOpen(false)} profile={profile} isAdmin={isAdmin}
+          tags={tags} leads={data.leads}
           onSignOut={onSignOut} onChangePassword={()=>{setSettingsOpen(false);setPwOpen(true);}} />
       )}
     </div>

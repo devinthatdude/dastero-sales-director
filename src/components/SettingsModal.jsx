@@ -2,6 +2,7 @@
 // Device-local settings (see src/lib/settings.js). Changes apply app-wide live.
 import { STAGES, OPEN_STAGES, repName } from '../lib/pipeline';
 import { useSettings, setSettings, resetSettings } from '../lib/settings';
+import TagManager from './TagManager';
 
 const TABS = ['today','pipeline','coach','leads','stats','import'];
 const openStages = STAGES.filter(s=>OPEN_STAGES.includes(s.id));
@@ -30,7 +31,7 @@ function Seg({value,options,onChange}){
 }
 function Lbl({children}){ return <div className="dim text-[11px] uppercase tracking-wide font-bold mb-1">{children}</div>; }
 
-export default function SettingsModal({ onClose, profile, isAdmin, onSignOut, onChangePassword }){
+export default function SettingsModal({ onClose, profile, isAdmin, onSignOut, onChangePassword, tags = [], leads = [] }){
   const s = useSettings();
 
   return (
@@ -83,6 +84,11 @@ export default function SettingsModal({ onClose, profile, isAdmin, onSignOut, on
               </label>
             </div>
             <div className="dim text-[11px] mt-2">0 = leave the next-action date blank.</div>
+          </Section>
+
+          {/* Tags */}
+          <Section title="Tags" desc="Shared labels you can attach to leads. Everyone on the team uses the same set.">
+            <TagManager tags={tags} leads={leads} />
           </Section>
 
           {/* Outreach identity */}
