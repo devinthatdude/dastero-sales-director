@@ -18,3 +18,9 @@ where schemaname = 'public' and tablename = 'profiles' and cmd = 'SELECT';
 ```
 Expect `profiles_select_authenticated` / `true`. If you see
 `profiles_select_self_or_admin`, run `2026-06-23_profiles_read_all.sql`.
+
+## tags write access
+`2026-06-25_tags_manage_authenticated.sql` grants INSERT/UPDATE/DELETE on
+`tags` to all authenticated users (in-app tag management) and makes
+`lead_tags.tag_id` cascade on delete. Apply it before using the Settings → Tags
+manager, or saves will fail with an RLS error.
