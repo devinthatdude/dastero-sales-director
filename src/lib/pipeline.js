@@ -62,3 +62,39 @@ export function repName(p){
   if(!p) return '—';
   return p.full_name || (p.email ? p.email.split('@')[0] : `Rep ${(p.id||'').slice(0,6)}`);
 }
+
+// Group leads by owning user for the Pipeline "By Owner" and "Tree" views.
+// Single source of truth for both. openCount/openValue always reflect open
+// deals (for the badge); count/value/leads honor includeClosed.
+export const CLOSED_STAGES = ['closed_won', 'closed_lost'];
+
+export function groupByOwner(leads, profiles, { includeClosed = false, currentUserId = null } = {}) {
+  const profileById = new Map((profiles || []).map(p => [p.id, p]));
+  const groups = new Map(); // key: user_id | '__unassigned__'
+
+  for (const lead of leads || []) {
+    const key = lead.user_id || '__unassigned__';
+    if (!groups.has(key)) {
+      groups.set(key, {
+        owner: lead.user_id ? (profileById.get(lead.user_id) || null) : null,
+        isUnassigned: !lead.user_id,
+        isYou: !!currentUserId && lead.user_id === currentUserId,
+        count: 0, value: 0, openCount: 0, openValue: 0, leads: [],
+      });
+    }
+    const g = groups.get(key);
+    const v = Number(lead.value) || 0;
+    const isClosed = CLOSED_STAGES.includes(lead.stage);
+    if (!isClosed) { g.openCount++; g.openValue += v; }
+    if (includeClosed || !isClosed) { g.count++; g.value += v; g.leads.push(lead); }
+  }
+
+  const list = [...groups.values()].filter(g => g.leads.length > 0);
+  list.sort((a, b) => {
+    if (a.isUnassigned !== b.isUnassigned) return a.isUnassigned ? 1 : -1;
+    if (a.isYou !== b.isYou) return a.isYou ? -1 : 1;
+    return b.value - a.value;
+  });
+  for (const g of list) g.leads.sort((a, b) => (Number(b.value) || 0) - (Number(a.value) || 0));
+  return list;
+}
